@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NilaiTugas;
+use App\Events\UpdateBadge;
+use App\Mail\NilaiTugasMail;
 use App\Models\Level;
 use App\Models\LogPoin;
 use App\Models\Pembayaran;
@@ -13,6 +16,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class PenilaianController extends Controller
@@ -30,7 +35,7 @@ class PenilaianController extends Controller
         return response()->download($filePath);
     }
 
-    public function index()
+    public function halamanPenilaian()
     {
         $role = Auth::user()->getRoleNames()->first();
         $menus = config('sidebar')[$role] ?? [];
@@ -60,12 +65,16 @@ class PenilaianController extends Controller
             ->get();
 
         $poins = Poin::where('status', 'aktif')->get();
+        $totalBobot = $poins->sum('bobot');
+        $isBobotValid = (round($totalBobot, 2) == 1.00);
 
         return view('admin.penilaian', compact(
             'jumlahPerProyek',
             'poins',
             'menus',
-            'badges'
+            'badges',
+            'totalBobot',
+            'isBobotValid'
         ));
     }
 
@@ -80,16 +89,83 @@ class PenilaianController extends Controller
 
     public function nilaiTugas(Request $request)
     {
+        $poins = Poin::where('status', 'aktif')->get();
+        $totalBobot = $poins->sum('bobot');
+        if (round($totalBobot, 2) != 1.00) {
+            return redirect()->back()->withErrors([
+                'error' => 'Penilaian gagal diproses karena total bobot aspek saat ini tidak valid (' . number_format($totalBobot, 2) . '). Silakan sesuaikan bobot di menu Pengaturan Poin terlebih dahulu.'
+            ]);
+        }
+
         $request->validate([
             'pengambilan_id' => 'required|exists:pengambilans,id',
             'skor' => 'required|array',
             'catatan' => 'nullable|array',
-            'total_skor' => 'required|integer',
-            'total_poin' => 'required|integer',
-            'total_pembayaran' => 'required|numeric',
         ]);
-        $totalPoin = (int) $request->total_poin;
 
+        // Validasi nilai skor tiap aspek: harus antara 1–10
+        $slugAktif = $poins->pluck('slug')->toArray();
+        $skorInput = $request->input('skor', []);
+
+        foreach ($slugAktif as $slug) {
+            if (!isset($skorInput[$slug])) {
+                return redirect()->back()->withErrors([
+                    'error' => "Skor untuk aspek '{$slug}' tidak ditemukan."
+                ]);
+            }
+
+            $nilai = (int) $skorInput[$slug];
+
+            if ($nilai < 1 || $nilai > 10) {
+                return redirect()->back()->withErrors([
+                    'error' => "Skor untuk aspek '{$slug}' harus berada di antara 1 hingga 10."
+                ]);
+            }
+        }
+
+        // Validasi catatan wajib diisi jika skor < 8
+        $catatanInput = $request->input('catatan', []);
+
+        foreach ($slugAktif as $slug) {
+            $nilai = (int) $skorInput[$slug];
+
+            if ($nilai < 8 && empty($catatanInput[$slug])) {
+                return redirect()->back()->withErrors([
+                    'error' => "Catatan wajib diisi untuk aspek '{$slug}' karena skornya di bawah 8."
+                ]);
+            }
+        }
+
+        //Ambil data pengambilan beserta relasi subsubproyek untuk harga & kualitas
+        $pengambilan = Pengambilan::with('subsubproyeks')->findOrFail($request->pengambilan_id);
+        $subsubproyek = $pengambilan->subsubproyeks;
+
+        $totalHalaman   = (int) $pengambilan->total_halaman;
+        $hargaPerlembar = (float) $subsubproyek->harga_perlembar;
+        $kualitas       = (float) $subsubproyek->kualitas;
+
+        //Hitung semua nilai
+        $skorBersih = [];
+        $totalSkor  = 0;
+        $weightedScore = 0.0;
+
+        foreach ($poins as $poin) {
+            $slug  = $poin->slug;
+            $nilai = (int) $skorInput[$slug];
+            $bobot = (float) $poin->bobot;
+
+            $skorBersih[$slug] = $nilai;
+            $totalSkor         += $nilai;
+            $weightedScore     += $nilai * $bobot;
+        }
+
+        // payment  = total_halaman × harga_perlembar × (weightedScore / 10)
+        $totalPembayaran = $totalHalaman * $hargaPerlembar * ($weightedScore / 10);
+
+        // poin     = round(total_halaman × (kualitas / 10) × (weightedScore / 10) × 2)
+        $totalPoin = (int) round($totalHalaman * ($kualitas / 10) * ($weightedScore / 10) * 2);
+
+        // Simpan ke database dalam satu transaksi
         DB::beginTransaction();
 
         try {
@@ -125,7 +201,7 @@ class PenilaianController extends Controller
 
             $user->update($dataUpdate);
 
-            Pembayaran::create([
+            $pembayaranBaru = Pembayaran::create([
                 'penilaian_id' => $penilaian->id,
                 'status' => 'belum_dibayar',
                 'total_pembayaran' => $request->total_pembayaran,
@@ -139,11 +215,30 @@ class PenilaianController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Penilaian berhasil');
+            try {
+                Mail::to($user->email)->queue(new NilaiTugasMail($user, $penilaian));
+            } catch (\Exception $e) {
+                Log::error('Gagal mengirim email penilaian: ' . $e->getMessage());
+            }
+
+            try {
+                $namaSubProyek = $pengambilan->subsubproyeks->subproyeks->nama_sub_proyek ?? 'Sub Proyek';
+                NilaiTugas::dispatch($penilaian, $user, $namaSubProyek);
+            } catch (\Exception $e) {
+                Log::error('Gagal memicu realtime penilaian: ' . $e->getMessage());
+            }
+
+            $admin = User::role('admin')->first();
+            if ($admin) {
+                UpdateBadge::dispatch($admin->id, 'admin');
+            }
+
+            return redirect()->route('pembayaran.detail', $pembayaranBaru->id)
+                ->with('success', 'Penilaian berhasil! Silakan periksa rincian pembayaran berikut.');
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return redirect()->back()->withErrors('Gagal menyimpan penilaian'. $e->getMessage());
+            return redirect()->back()->withErrors('Gagal menyimpan penilaian' . $e->getMessage());
         }
     }
 }

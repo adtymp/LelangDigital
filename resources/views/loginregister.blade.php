@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8" />
@@ -8,177 +8,299 @@
     <link rel="icon" type="image/png" href="{{ asset('image/logo-pranala.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
 </head>
 
-<body>
+<body class="antialiased font-sans">
     <x-alert></x-alert>
-    <div x-data="authPage()" class="min-h-screen bg-linear-to-r from-brand-500 via-brand-700 to-brand-500 bg-cover">
-        <div class="flex min-h-screen items-center justify-center p-6">
-            <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
-                <div class="text-center mb-6 space-y-3">
 
-                    <!-- Logo + Brand -->
-                    <div class="flex flex-col items-center space-y-2 mb-4">
-                        <img src="{{ asset('image/logo-pranala.png') }}" alt="Logo"
-                            class="w-10 h-10 object-contain">
+    <div x-data="authPage()" class="min-h-screen bg-linear-to-br from-brand-600 via-brand-700 to-brand-900 flex items-center justify-center p-4 sm:p-6 md:p-10">
 
-                        <div class="text-lg text-gray-700 leading-tight">
-                            <p class="text-2xl font-bold bg-linear-to-r from-brand-500 to-brand-700 bg-clip-text text-transparent">Sistem Lelang Digital</p>
-                            <p class="text-gray-500">PT. Digital Pranala Transmaritim</p>
-                        </div>
+        <div class="w-full bg-white rounded-3xl shadow-2xl overflow-hidden transition-all duration-500 ease-in-out grid grid-cols-1 md:grid-cols-12"
+            :class="isLogin ? 'max-w-4xl' : 'max-w-5xl'">
+
+            <!-- KIRI: BRAND SHOWCASE PANEL (Hanya tampil di tablet & desktop) -->
+            <div class="hidden md:flex md:col-span-5 bg-linear-to-tr from-brand-800 to-brand-600 p-10 text-white flex-col justify-between relative overflow-hidden">
+                <div class="absolute -top-10 -left-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+                <div class="absolute -bottom-20 -right-20 w-60 h-60 bg-brand-500/30 rounded-full blur-3xl"></div>
+                <div class="flex items-center space-x-3 z-10">
+                    <div class="p-2.5 bg-white backdrop-blur-md rounded-2xl border border-white/20">
+                        <img src="{{ asset('image/logo-pranala.png') }}" alt="Logo" class="w-8 h-8 object-contain">
                     </div>
-
-
-                    <p class="text-gray-600 text-sm">
-                        <span x-text="isLogin ? 'Silahkan login untuk melanjutkan' : 'Mulai dengan membuat akun'"></span>
-                    </p>
-
+                    <div>
+                        <h2 class="font-bold text-lg leading-tight tracking-wide">Pranala GigPortal</h2>
+                        <p class="text-xs text-brand-200">PT. Pranala Digital Transmaritim</p>
+                    </div>
                 </div>
-                <!-- LOGIN FORM -->
-                <form x-show="isLogin" method="POST" action="{{ route('login.proses') }}" class="space-y-5">
-                    @csrf
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                        <input type="email" name="email" required x-model="email" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" placeholder="you@example.com" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                        <div class="relative">
-                            <input :type="showPassword ? 'text' : 'password'" name="password" required x-model="password" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" placeholder="••••••••" />
-                            <button type="button" class="absolute right-3 top-3 text-gray-400" @click="showPassword = !showPassword">
-                                <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
-                            </button>
+                <div class="my-auto py-8 z-10 space-y-6">
+                    <h1 class="text-2xl lg:text-3xl font-extrabold leading-tight tracking-tight">
+                        Kelola Proyek Dokumen Lebih Cepat di
+                        <span class="bg-linear-to-r from-brand-300 to-white bg-clip-text text-transparent">Pranala GigPortal</span>
+                    </h1>
+                    <p class="text-sm text-brand-100/90 leading-relaxed">
+                        Platform modern yang mempertemukan kebutuhan proyek perusahaan dengan keahlian para freelancer profesional secara transparan, aman, dan efisien.
+                    </p>
+                    <!-- Fitur Unggulan (USP) -->
+                    <div class="space-y-4 pt-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="shrink-0 w-6 h-6 rounded-full bg-white/15 flex items-center justify-center text-xs">
+                                <i class="fas fa-hand-holding-usd text-brand-200"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-white">Upah Per Lembar Jelas</h4>
+                                <p class="text-xs text-brand-200/80">Klaim tugas dengan harga per lembar halaman yang pasti.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="shrink-0 w-6 h-6 rounded-full bg-white/15 flex items-center justify-center text-xs">
+                                <i class="fas fa-scissors text-brand-200"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-white">Pemisahan PDF Otomatis</h4>
+                                <p class="text-xs text-brand-200/80">Sistem membagi tugas PDF secara otomatis sesuai klaim Anda.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="shrink-0 w-6 h-6 rounded-full bg-white/15 flex items-center justify-center text-xs">
+                                <i class="fas fa-chart-line text-brand-200"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-white">Sistem Poin & Leveling</h4>
+                                <p class="text-xs text-brand-200/80">Dapatkan poin dari kualitas kerja untuk menaikkan reputasi level.</p>
+                            </div>
                         </div>
                     </div>
-                    <x-primary-button type="submit" full>Masuk</x-primary-button>
+                </div>
+                <!-- Footer Hak Cipta -->
+                <div class="text-xs text-brand-300/60 z-10">
+                    &copy; {{ date('Y') }} PT. Digital Pranala Transmaritim.
+                </div>
+            </div>
+
+            <!-- KANAN: FORM PANEL (LOGIN & REGISTER) -->
+            <div class="col-span-1 md:col-span-7 p-6 sm:p-8 lg:p-10 flex flex-col justify-center">
+
+                <!-- Mobile Header (Hanya tampil di mobile) -->
+                <div class="flex flex-col items-center text-center mb-6 space-y-2 md:hidden">
+                    <img src="{{ asset('image/logo-pranala.png') }}" alt="Logo" class="w-12 h-12 object-contain">
+                    <div>
+                        <h2 class="text-2xl font-bold bg-linear-to-r from-brand-500 to-brand-700 bg-clip-text text-transparent">Sistem Lelang Digital</h2>
+                        <p class="text-xs text-gray-500 font-medium">PT. Digital Pranala Transmaritim</p>
+                    </div>
+                </div>
+
+                <!-- Judul & Sub-judul Form Dinamis -->
+                <div class="mb-6">
+                    <h2 class="hidden md:block text-2xl lg:text-3xl font-bold text-slate-800 tracking-tight"
+                        x-text="isLogin ? 'Selamat Datang Kembali' : 'Pendaftaran Akun Baru'"></h2>
+                    <p class="text-sm text-slate-500 mt-2">
+                        <span x-text="isLogin ? 'Silakan masuk untuk mengakses dasbor lelang Anda.' : 'Lengkapi formulir di bawah ini untuk memulai registrasi mitra.'"></span>
+                    </p>
+                </div>
+
+                <!-- FORM LOGIN -->
+                <form x-show="isLogin" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" method="POST" action="{{ route('login.proses') }}" class="space-y-4">
+                    @csrf
+
+                    <x-input
+                        namaLabel="Email"
+                        type="email"
+                        namaInput="email"
+                        slang="contoh@domain.com"
+                        required
+                        x-model="email" />
+
+                    <div class="relative">
+                        <x-input
+                            namaLabel="Password"
+                            namaInput="password"
+                            slang="••••••••"
+                            required
+                            x-model="password"
+                            ::type="showPassword ? 'text' : 'password'" />
+                        <button type="button" class="absolute right-4 bottom-3 text-slate-400 hover:text-slate-600 focus:outline-none" @click="showPassword = !showPassword">
+                            <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                        </button>
+                    </div>
+
+                    <div class="pt-2">
+                        <x-primary-button type="submit" full>Masuk ke Akun</x-primary-button>
+                    </div>
                 </form>
 
-                <!-- REGISTER FORM -->
-                <form x-show="!isLogin" method="POST" action="{{ route('register.proses') }}" enctype="multipart/form-data" class="space-y-5">
+                <!-- FORM REGISTER (Responsif 2 Kolom pada md:) -->
+                <form x-show="!isLogin" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" method="POST" action="{{ route('register.proses') }}" enctype="multipart/form-data" class="space-y-4">
                     @csrf
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
-                        <input type="text" name="name" required x-model="name" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" placeholder="John Doe" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                        <input type="email" name="email" required x-model="email" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" placeholder="you@example.com" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                        <div class="relative">
-                            <input :type="showPassword ? 'text' : 'password'" name="password" required x-model="password" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" placeholder="••••••••" />
-                            <button type="button" class="absolute right-3 top-3 text-gray-400" @click="showPassword = !showPassword">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Nama Lengkap -->
+                        <div class="col-span-1">
+                            <x-input
+                                namaLabel="Nama Lengkap"
+                                type="text"
+                                namaInput="name"
+                                slang="Nama Lengkap Anda"
+                                required
+                                x-model="name" />
+                            @error('name')
+                            <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Email -->
+                        <div class="col-span-1">
+                            <x-input
+                                namaLabel="Email"
+                                type="email"
+                                namaInput="email"
+                                slang="contoh@domain.com"
+                                required
+                                x-model="email" />
+                            @error('email')
+                            <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Password -->
+                        <div class="col-span-1 relative">
+                            <x-input
+                                namaLabel="Password"
+                                namaInput="password"
+                                slang="••••••••"
+                                required
+                                x-model="password"
+                                ::type="showPassword ? 'text' : 'password'" />
+                            <button type="button" class="absolute right-4 bottom-3 text-slate-400 hover:text-slate-600 focus:outline-none" @click="showPassword = !showPassword">
                                 <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
                             </button>
+                            @error('password')
+                            <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Konfirmasi Password</label>
-                        <div class="relative">
-                            <input :type="showConfirmPassword ? 'text' : 'password'" name="password_confirmation" required x-model="confirmPassword" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" placeholder="••••••••" />
-                            <button type="button" class="absolute right-3 top-3 text-gray-400" @click="showConfirmPassword = !showConfirmPassword">
+
+                        <!-- Konfirmasi Password -->
+                        <div class="col-span-1 relative">
+                            <x-input
+                                namaLabel="Konfirmasi Password"
+                                namaInput="password_confirmation"
+                                slang="••••••••"
+                                required
+                                x-model="confirmPassword"
+                                ::type="showConfirmPassword ? 'text' : 'password'" />
+                            <button type="button" class="absolute right-4 bottom-3 text-slate-400 hover:text-slate-600 focus:outline-none" @click="showConfirmPassword = !showConfirmPassword">
                                 <i :class="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
                             </button>
                         </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">No HP</label>
-                        <input type="text" name="no_telp" required x-model="no_telp" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" placeholder="088********" />
-                    </div>
-                    <div x-data="{ type: 'file' }"
-                        class="space-y-3">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Portofolio</label>
-                        <div class="relative">
-                            <select name="type" x-model="type"
-                                class="bg-gray-50 border border-gray-200 text-gray-900 col-start-1 row-start-1 w-full appearance-none rounded-md py-1.5 pr-7 pl-3 text-base placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 sm:text-sm/6">
-                                <option value="file">File</option>
-                                <option value="link">Link</option>
-                            </select>
-                            <svg class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"
-                                viewBox="0 0 16 16" fill="currentColor">
-                                <path fill-rule="evenodd"
-                                    d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                        </div>
-                        <div
-                            x-show="type === 'file'"
-                            x-transition
-                            x-cloak
-                            class="space-y-2">
 
-                            <input
-                                type="file"
-                                name="file_path"
-                                accept=".jpg,.jpeg,.png,.pdf"
-                                class="block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-brand-500 file:text-white hover:file:bg-brand-700">
-
-                            <p class="text-xs text-gray-500">
-                                Format: JPG, JPEG, PNG, PDF • Maksimal ukuran: 5 MB
-                            </p>
-
-                        </div>
-
-                        <!-- LINK INPUT -->
-                        <div
-                            x-show="type === 'link'"
-                            x-transition
-                            x-cloak
-                            class="space-y-3">
-                            <input
-                                type="url"
-                                name="link_url"
-                                value="{{ old('link_url') }}"
-                                placeholder="https://contoh.com/portofolio"
-                                class="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-
-                            @error('link_url')
-                            <p class="text-sm text-red-500">{{ $message }}</p>
+                        <!-- No HP -->
+                        <div class="col-span-1 md:col-span-2">
+                            <x-input
+                                namaLabel="No HP (Telepon)"
+                                type="text"
+                                namaInput="no_telp"
+                                slang="08812345678"
+                                required
+                                x-model="no_telp" />
+                            @error('no_telp')
+                            <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
                             @enderror
+                        </div>
 
-                            <div>
-                                <p class="text-sm font-medium text-gray-600 mb-2">Link yang diizinkan:</p>
-                                <div class="flex flex-wrap gap-2">
-                                    @foreach ($terimaDomain as $domain)
-                                    <span class="px-3 py-1 text-xs bg-blue-100 text-brand-500 rounded-full">
-                                        {{ $domain }}
-                                    </span>
-                                    @endforeach
+                        <!-- Dropdown Portofolio & Inputs -->
+                        <div class="col-span-1 md:col-span-2" x-data="{ type: 'file' }">
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-slate-700">Jenis Portofolio</label>
+                                <div class="relative">
+                                    <select name="type" x-model="type"
+                                        class="w-full bg-slate-50 border border-slate-200 text-slate-900 appearance-none rounded-xl py-3 pr-10 pl-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all">
+                                        <option value="file">File (Dokumen/Gambar)</option>
+                                        <option value="link">Link Tautan</option>
+                                    </select>
+                                    <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"
+                                        viewBox="0 0 16 16" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+
+                                <!-- INPUT FILE -->
+                                <div x-show="type === 'file'" x-transition x-cloak class="space-y-2 pt-1">
+                                    <x-input
+                                        type="file"
+                                        namaInput="file_path"
+                                        accept=".jpg,.jpeg,.png,.pdf" />
+                                    <p class="text-[11px] text-slate-500">
+                                        Format yang diterima: JPG, JPEG, PNG, PDF • Maksimal: 5 MB
+                                    </p>
+                                    @error('file_path')
+                                    <p class="text-xs text-red-500">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <!-- INPUT LINK -->
+                                <div x-show="type === 'link'" x-transition x-cloak class="space-y-3 pt-1">
+                                    <x-input
+                                        type="url"
+                                        namaInput="link_url"
+                                        value="{{ old('link_url') }}"
+                                        slang="https://domain.com/portofolio" />
+                                    @error('link_url')
+                                    <p class="text-xs text-red-500">{{ $message }}</p>
+                                    @enderror
+
+                                    <div>
+                                        <p class="text-xs font-semibold text-slate-500 mb-2">Tautan yang diizinkan:</p>
+                                        <div class="flex flex-wrap gap-1.5">
+                                            @foreach ($terimaDomain as $domain)
+                                            <span class="px-2.5 py-0.5 text-xs bg-brand-50 text-brand-700 rounded-full font-medium border border-brand-100">
+                                                {{ $domain }}
+                                            </span>
+                                            @endforeach
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <x-primary-button type="submit" full>Daftar</x-primary-button>
+
+                    <div class="pt-3">
+                        <x-primary-button type="submit" full>Daftar Sekarang</x-primary-button>
+                    </div>
                 </form>
 
+                <!-- LOGIN OAUTH DENGAN GOOGLE -->
                 <div class="mt-4">
                     <a href="{{ route('google.login') }}"
-                        class="w-full inline-flex items-center justify-center gap-3 border border-gray-400 rounded-xl px-4 py-3 hover:bg-gray-200 transition">
-
-                        <img src="https://www.svgrepo.com/show/475656/google-color.svg"
-                            class="w-5 h-5">
-
-                        <span class="font-medium text-gray-700">
+                        class="w-full inline-flex items-center justify-center gap-3 border border-slate-300 rounded-xl px-4 py-3 hover:bg-slate-50 active:bg-slate-100 transition-colors shadow-sm">
+                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google Logo">
+                        <span class="font-semibold text-sm text-slate-700">
                             Lanjut dengan Google
                         </span>
                     </a>
                 </div>
-                <!-- SWITCH FORM -->
-                <p class="mt-6 text-center text-gray-600">
-                    <span x-text="isLogin ? 'Belum punya akun?' : 'Sudah punya akun?'"></span>
-                    <button type="button" class="ml-1 text-brand-500 hover:text-brand-700 font-semibold" @click="isLogin = !isLogin">
-                        <span x-text="isLogin ? 'Daftar' : 'Masuk'"></span>
+
+                <!-- TOMBOL SWITCH FORM -->
+                <p class="mt-6 text-center text-sm text-slate-600">
+                    <span x-text="isLogin ? 'Belum punya akun?' : 'Sudah memiliki akun?'"></span>
+                    <button type="button" class="ml-1 text-brand-600 hover:text-brand-800 font-bold hover:underline focus:outline-none transition-colors" @click="isLogin = !isLogin">
+                        <span x-text="isLogin ? 'Daftar Mitra' : 'Masuk'"></span>
                     </button>
                 </p>
             </div>
         </div>
     </div>
 
+    <!-- Script Alpine JS Initialization -->
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('authPage', () => ({
-                isLogin: true,
+                // Secara otomatis memuat form registrasi jika URL memiliki hash #register
+                isLogin: window.location.hash !== '#register',
                 showPassword: false,
                 showConfirmPassword: false,
                 email: '',

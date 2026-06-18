@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('avatar')->nullable();
             $table->boolean('is_google_user')->default(false);
             $table->string('password')->nullable()->change();
+            $table->string('no_telp')->nullable()->change();
         });
     }
 
@@ -25,7 +26,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            //
+            $table->dropColumn(['google_id', 'avatar', 'is_google_user']);
+            $table->string('password')->nullable(false)->change();
+            $table->string('no_telp')->nullable(false)->change();
         });
     }
 };

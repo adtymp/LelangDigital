@@ -16,7 +16,7 @@
             class="bg-white border border-gray-200 shadow-xl rounded-2xl p-4 flex gap-3">
 
             {{-- ICON --}}
-            <div class="flex-shrink-0">
+            <div class="shrink-0">
                 <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
                     💬
                 </div>

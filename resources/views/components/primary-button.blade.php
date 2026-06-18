@@ -7,7 +7,7 @@
     type="{{ $type }}"
     {{ $attributes->class([
         'inline-flex items-center justify-center',
-        'rounded-xl px-5 py-3',
+        'rounded-2xl px-5 py-3',
         'font-semibold text-white',
         'transition-colors shadow-sm',
 

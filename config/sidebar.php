@@ -82,7 +82,7 @@ return [
             'label' => 'Dashboard',
             'route' => 'dashboard.freelance',
             'icon' => 'dashboard',
-            'badge' => null
+            'badge' => 'proyekAktif'
         ],
 
         [
@@ -117,7 +117,7 @@ return [
             'label' => 'Chat',
             'route' => 'chat.index',
             'icon' => 'chat',
-            'badge' => null
+            'badge' => 'chat'
         ],
 
     ],

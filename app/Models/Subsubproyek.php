@@ -25,6 +25,6 @@ class Subsubproyek extends Model
     }
 
     public function pengambilans(){
-        return $this->hasMany(Pengambilan::class);
+        return $this->hasMany(Pengambilan::class)->orderBy('dari_halaman', 'asc');;
     }
 }

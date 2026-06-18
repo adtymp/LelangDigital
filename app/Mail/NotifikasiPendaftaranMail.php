@@ -10,7 +10,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class NonaktifUser extends Mailable
+class NotifikasiPendaftaranMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -27,7 +27,7 @@ class NonaktifUser extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Penonaktifan Akun',
+            subject: 'Notifikasi Pendaftaran',
         );
     }
 
@@ -37,7 +37,7 @@ class NonaktifUser extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'email.nonaktifUser',
+            markdown: 'emails.notifikasi_pendaftaran',
             with: [
                 'user' => $this->user,
             ],

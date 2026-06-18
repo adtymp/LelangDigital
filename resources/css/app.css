@@ -5,6 +5,10 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
+[x-cloak] {
+    display: none !important;
+}
+
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
@@ -19,4 +23,24 @@
         --color-brand-700: #5c153d;
         --color-brand-800: #430f2c;
         --color-brand-900: #2b091c;
+}
+
+/* Custom scrollbar untuk sidebar */
+aside::-webkit-scrollbar {
+    width: 4px;
+}
+aside::-webkit-scrollbar-track {
+    background: transparent;
+}
+aside::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 9999px;
+}
+/* Badge pulse animation */
+@keyframes badge-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+.badge-animate {
+    animation: badge-pulse 0.3s ease-in-out;
 }

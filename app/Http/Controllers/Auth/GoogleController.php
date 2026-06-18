@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Mail\NotifikasiPendaftaran;
+use App\Mail\NotifikasiPendaftaranMail;
 use App\Models\Level;
 use App\Models\Portofolio;
 use App\Models\User;
@@ -77,7 +77,7 @@ class GoogleController extends Controller
             /**
              * Jika belum punya portofolio
              */
-            if (!$user->portofolio) {
+            if (!$user->portofolio || $user->status_verifikasi === 'ditolak') {
                 return redirect()->route('google.lengkapi');
             }
 
@@ -110,13 +110,13 @@ class GoogleController extends Controller
         /**
          * Jika sudah punya portofolio
          */
-        if ($user->portofolio) {
+        if ($user->portofolio && $user->status_verifikasi !== 'ditolak') {
             return $this->redirectByRole($user);
         }
 
         $terimaDomain = config('portofolio.terima_domain');
 
-        return view('auth.lengkapi-google', compact(
+        return view('auth.form-portofolio', compact(
             'user',
             'terimaDomain'
         ));
@@ -194,7 +194,7 @@ class GoogleController extends Controller
              * Kirim email admin
              */
             Mail::to(env('ADMIN_EMAIL'))
-                ->queue(new NotifikasiPendaftaran($user));
+                ->queue(new NotifikasiPendaftaranMail($user));
 
             DB::commit();
 
@@ -203,12 +203,7 @@ class GoogleController extends Controller
              */
             Auth::logout();
 
-            return redirect()
-                ->route('login')
-                ->with(
-                    'success',
-                    'Pendaftaran berhasil dan sedang menunggu konfirmasi admin.'
-                );
+            return redirect('login')->with('success', 'Pendaftaran sukses, sedang diajukan untuk dikonfirmasi oleh admin');
 
         } catch (\Throwable $e) {
 
@@ -274,7 +269,7 @@ class GoogleController extends Controller
             }
 
             return redirect()
-                ->route('dashboard.freelance');
+                ->route('dashboard.freelance')->with('success', 'Anda berhasil login');
         }
 
         Auth::logout();

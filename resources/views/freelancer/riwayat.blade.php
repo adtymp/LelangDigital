@@ -1,242 +1,229 @@
-@extends('layouts.body', ['title' => 'Dashboard'])
+@extends('layouts.body', ['title' => 'Riwayat Pekerjaan'])
 
 @section('content')
 <x-header
     :judul="'Riwayat Pekerjaan'"
-    :subjudul="'Lihat aspek penilaian dan bobotnya'" />
+    :subjudul="'Lihat aspek penilaian, bobot, dan status pembayaran pekerjaan Anda'" />
 
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white rounded-xl p-6 border border-gray-200">
-        <p class="text-gray-500 mb-2">Total Proyek</p>
-        <p class="text-3xl text-blue-600">{{ $totalProyek }}</p>
-    </div>
-    <div class="bg-white rounded-xl p-6 border border-gray-200">
-        <p class="text-gray-500 mb-2">Sudah Dibayar</p>
-        <p class="text-3xl text-green-600">{{ $sudahDibayar }}</p>
-    </div>
-    <div class="bg-white rounded-xl p-6 border border-gray-200">
-        <p class="text-gray-500 mb-2">Belum Dibayar</p>
-        <p class="text-3xl text-orange-600">{{ $belumDibayar }}</p>
-    </div>
-    <div class="bg-white rounded-xl p-6 border border-gray-200">
-        <p class="text-gray-500 mb-2">Total Pendapatan</p>
-        <p class="text-3xl text-blue-600">
-            {{ number_format($totalPendapatan, 0, ',', '.') }}
-        </p>
-    </div>
+<!-- Ringkasan Statistik -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <x-stat-card title="Total Proyek" :value="$totalProyek" color="yellow"></x-stat-card>
+    <x-stat-card title="Sudah Dibayar" :value="$sudahDibayar" color="blue"></x-stat-card>
+    <x-stat-card title="Belum Dibayar" :value="$belumDibayar" color="red"></x-stat-card>
+    <x-stat-card title="Total Pendapatan" :value="'Rp. ' . number_format($totalPendapatan, 0, ',', '.')" color="green"></x-stat-card>
 </div>
 
-<div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Konfigurasi Filter Bulan & Tahun untuk Komponen search-filter -->
+@php
+$months = [
+'01' => 'Januari',
+'02' => 'Februari',
+'03' => 'Maret',
+'04' => 'April',
+'05' => 'Mei',
+'06' => 'Juni',
+'07' => 'Juli',
+'08' => 'Agustus',
+'09' => 'September',
+'10' => 'Oktober',
+'11' => 'November',
+'12' => 'Desember'
+];
 
-        {{-- Search --}}
-        <div class="relative">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                viewBox="0 0 640 640" fill="currentColor">
-                <path d="M480 272C480 317.9 465.1 360.3 440 394.7L566.6 521.4C579.1 533.9 579.1 554.2 566.6 566.7C554.1 579.2 533.8 579.2 521.3 566.7L394.7 440C360.3 465.1 317.9 480 272 480C157.1 480 64 386.9 64 272C64 157.1 157.1 64 272 64C386.9 64 480 157.1 480 272zM272 416C351.5 416 416 351.5 416 272C416 192.5 351.5 128 272 128C192.5 128 128 192.5 128 272C128 351.5 192.5 416 272 416z" />
-            </svg>
+// Buat daftar pilihan tahun secara dinamis (sejak tahun awal sistem berjalan)
+$currentYear = date('Y');
+$years = [];
+for ($y = $currentYear; $y >= 2024; $y--) {
+$years[$y] = $y;
+}
 
-            <input
-                type="text"
-                placeholder="Cari proyek..."
-                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
-        </div>
+$filterConfig = [
+[
+'placeholder' => 'Pilih Bulan',
+'name' => 'bulan',
+'options' => $months
+],
+[
+'placeholder' => 'Pilih Tahun',
+'name' => 'tahun',
+'options' => $years
+]
+];
+@endphp
 
-        {{-- Filter Harga --}}
-        <div class="relative">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                viewBox="0 0 640 640" fill="currentColor">
-                <path d="M96 128C83.1 128 71.4 135.8 66.4 147.8C61.4 159.8 64.2 173.5 73.4 182.6L256 365.3L256 480C256 488.5 259.4 496.6 265.4 502.6L329.4 566.6C338.6 575.8 352.3 578.5 364.3 573.5C376.3 568.5 384 556.9 384 544L384 365.3L566.6 182.7C575.8 173.5 578.5 159.8 573.5 147.8C568.5 135.8 556.9 128 544 128L96 128z" />
-            </svg>
+<!-- Integrasi Komponen Search Filter Bawaan Sistem -->
+<x-search-filter
+    :action="url()->current()"
+    search-placeholder="Cari nama proyek, sub-proyek, atau halaman..."
+    :filters="$filterConfig" />
 
-            <select
-                class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent appearance-none bg-white">
-                <option value="all">Semua Harga</option>
-                <option value="low">&lt; Rp 1.000</option>
-                <option value="medium">Rp 1.000 - Rp 3.000</option>
-                <option value="high">&gt; Rp 3.000</option>
-            </select>
+<!-- Container Alpine.js -->
+<div x-data="riwayatComponent()" class="space-y-6">
 
-            {{-- Icon panah dropdown --}}
-            <svg xmlns="http://www.w3.org/2000/svg"
-                class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M19 9l-7 7-7-7" />
-            </svg>
-        </div>
+    <!-- AREA DAFTAR RIWAYAT (DIKELOMPOKKAN PER BULAN) -->
+    <div class="space-y-8">
+        <template x-for="group in groupedPembayarans" :key="group.monthYear">
+            <div class="space-y-4">
 
-    </div>
-</div>
+                <!-- Pemisah Kelompok Bulan -->
+                <div class="sticky top-0 z-10 w-full flex justify-end">
+                    <div class="flex items-center gap-3">
+                        <span class="bg-linear-to-r from-brand-500 to-brand-700 text-white text-sm font-semibold border border-brand-100 px-2 py-2 rounded-2xl  uppercase" x-text="group.monthYear"></span>
+                        <div class="flex-1 h-px bg-slate-200"></div>
+                    </div>
+                </div>
 
-<div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-200">
-        <h2 class="text-gray-900 font-semibold">Daftar Riwayat Pekerjaan</h2>
-    </div>
-    <div class="overflow-x-auto">
-        <table class="w-full">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-gray-500">Nama Proyek</th>
-                    <th class="px-6 py-3 text-left text-gray-500">Sub Proyek</th>
-                    <th class="px-6 py-3 text-left text-gray-500">Rentang Halaman</th>
-                    <th class="px-6 py-3 text-left text-gray-500">Tanggal Selesai</th>
-                    <th class="px-6 py-3 text-left text-gray-500">Total Upah</th>
-                    <th class="px-6 py-3 text-left text-gray-500">Status Pembayaran</th>
-                    <th class="px-6 py-3 text-left text-gray-500">Aksi</th>
-                </tr>
-            </thead>
-            <tbody x-data="{
-                        modalDetail : false,
-                        lihatDetail : null}" class="divide-y divide-gray-200">
-                @forelse ($pembayarans as $pembayaran)
-                <tr>
-                    <td class="px-6 py-4">
-                        <p class="text-gray-900">{{ $pembayaran->penilaian->pengambilan->subsubproyeks->subproyeks->proyeks->nama_proyek }}</p>
-                    </td>
-                    <td class="px-6 py-4">
-                        <p class="text-gray-500">{{ $pembayaran->penilaian->pengambilan->subsubproyeks->subproyeks->nama_sub_proyek }}</p>
-                        <p class="text-gray-500 text-xs">{{ $pembayaran->penilaian->pengambilan->subsubproyeks->nama_halaman }}</p>
-                    </td>
-                    <td class="px-6 py-4">
-                        <p class="text-gray-500">{{ $pembayaran->penilaian->pengambilan->dari_halaman }} - {{ $pembayaran->penilaian->pengambilan->sampai_halaman }}</p>
-                    </td>
-                    <td class="px-6 py-4">
-                        <p class="text-gray-500">{{ $pembayaran->updated_at->format('d/m/Y H:i') }}</xp>
-                    </td>
-                    <td class="px-6 py-4">
-                        <p class="text-gray-900">Rp. {{ number_format($pembayaran->total_pembayaran, 0, ',', '.') }}</p>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span @class([ 'inline-flex px-3 py-1 rounded-full text-xs' , 'bg-green-200 text-green-800'=> $pembayaran->status === 'sudah_dibayar',
-                            'bg-red-200 text-red-800' => $pembayaran->status === 'belum_dibayar'
-                            ])>
-                            {{ $pembayaran->status }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <button @click="
-                                    modalDetail = true;
-                                    lihatDetail = @js($pembayaran)"
-                            class="flex items-center px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
-                                <path fill="currentColor" d="M320 144C254.8 144 201.2 173.6 160.1 211.7C121.6 247.5 95 290 81.4 320C95 350 121.6 392.5 160.1 428.3C201.2 466.4 254.8 496 320 496C385.2 496 438.8 466.4 479.9 428.3C518.4 392.5 545 350 558.6 320C545 290 518.4 247.5 479.9 211.7C438.8 173.6 385.2 144 320 144zM127.4 176.6C174.5 132.8 239.2 96 320 96C400.8 96 465.5 132.8 512.6 176.6C559.4 220.1 590.7 272 605.6 307.7C608.9 315.6 608.9 324.4 605.6 332.3C590.7 368 559.4 420 512.6 463.4C465.5 507.1 400.8 544 320 544C239.2 544 174.5 507.2 127.4 463.4C80.6 419.9 49.3 368 34.4 332.3C31.1 324.4 31.1 315.6 34.4 307.7C49.3 272 80.6 220 127.4 176.6zM320 400C364.2 400 400 364.2 400 320C400 290.4 383.9 264.5 360 250.7C358.6 310.4 310.4 358.6 250.7 360C264.5 383.9 290.4 400 320 400zM240.4 311.6C242.9 311.9 245.4 312 248 312C283.3 312 312 283.3 312 248C312 245.4 311.8 242.9 311.6 240.4C274.2 244.3 244.4 274.1 240.5 311.5zM286 196.6C296.8 193.6 308.2 192.1 319.9 192.1C328.7 192.1 337.4 193 345.7 194.7C346 194.8 346.2 194.8 346.5 194.9C404.4 207.1 447.9 258.6 447.9 320.1C447.9 390.8 390.6 448.1 319.9 448.1C258.3 448.1 206.9 404.6 194.7 346.7C192.9 338.1 191.9 329.2 191.9 320.1C191.9 309.1 193.3 298.3 195.9 288.1C196.1 287.4 196.2 286.8 196.4 286.2C208.3 242.8 242.5 208.6 285.9 196.7z" />
-                            </svg>
-                            <span>Lihat Detail</span>
-                        </button>
-
-                        <div x-show="modalDetail" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                            <div class="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-                                <div class="p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
-                                    <h2 class="text-gray-900">Detail Riwayat Pekerjaan</h2>
-                                    <p class="text-gray-500 text-sm mt-1">
-                                        Informasi lengkap proyek yang telah diselesaikan
+                <!-- TAMPILAN MOBILE (BLOCK MD:HIDDEN) -->
+                <div class="block md:hidden space-y-4">
+                    <template x-for="p in group.items" :key="p.id">
+                        <div class="bg-white border border-slate-200 rounded-3xl p-5 space-y-4 shadow-xs">
+                            <div class="flex justify-between items-start gap-3">
+                                <div class="min-w-0">
+                                    <h4 class="font-bold text-slate-900 text-sm leading-snug" x-text="p.penilaian.pengambilan.subsubproyeks.subproyeks.proyeks.nama_proyek"></h4>
+                                    <p class="text-xs text-slate-500 mt-1">
+                                        <span x-text="p.penilaian.pengambilan.subsubproyeks.subproyeks.nama_sub_proyek"></span>
+                                        <span class="mx-1.5 text-slate-300">•</span>
+                                        <span class="text-slate-700" x-text="p.penilaian.pengambilan.subsubproyeks.nama_halaman"></span>
                                     </p>
                                 </div>
-
-                                <div class="p-6">
-                                    <div class="bg-gray-50 rounded-xl p-6 mb-6">
-                                        <h3 class="text-gray-900 mb-4">Informasi Proyek</h3>
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <p class="text-gray-500 text-sm mb-1">Nama Proyek</p>
-                                                <p class="text-gray-900" x-text="lihatDetail?.penilaian?.pengambilan?.subsubproyeks?.subproyeks?.proyeks?.nama_proyek ?? '-'"></p>
-                                            </div>
-                                            <div>
-                                                <p class="text-gray-500 text-sm mb-1">Sub Proyek</p>
-                                                <p class="text-gray-900" x-text="lihatDetail?.penilaian?.pengambilan?.subsubproyeks?.subproyeks?.nama_sub_proyek ?? '-'"></p>
-                                            </div>
-                                            <div>
-                                                <p class="text-gray-500 text-sm mb-1">Sub Sub Proyek</p>
-                                                <p class="text-gray-900" x-text="lihatDetail?.penilaian?.pengambilan?.subsubproyeks?.nama_halaman ?? '-'"></p>
-                                            </div>
-                                            <div>
-                                                <p class="text-gray-500 text-sm mb-1">Rentang Halaman</p>
-                                                <div class="flex items-center">
-                                                    <span class="text-gray-900" x-text="lihatDetail?.penilaian?.pengambilan?.dari_halaman ?? '-'"></span> -
-                                                    <span class="text-gray-900" x-text="lihatDetail?.penilaian?.pengambilan?.sampai_halaman ?? '-'"></span>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <p class=" text-gray-500 text-sm mb-1">Tanggal Selesai</p>
-                                                <p class="text-gray-900" x-text="lihatDetail?.update_at"></p>
-                                            </div>
-                                            <div>
-                                                <p class="text-gray-500 text-sm mb-1">Total Upah</p>
-                                                <p class="text-2xl text-blue-600" x-text="lihatDetail?.total_pembayaran 
-                                                            ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(lihatDetail.total_pembayaran) 
-                                                            : '-'"></p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="bg-gray-50 rounded-xl p-6 mb-6">
-                                        <h3 class="text-gray-900 mb-4">File Hasil yang Diupload</h3>
-                                        <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                                            Download File Hasil (.xlsx)
-                                        </button>
-                                    </div>
-
-                                    <div class="bg-gray-50 rounded-xl p-6 mb-6">
-                                        <h3 class="text-gray-900 mb-4">Nilai Akhir</h3>
-                                        <div class="flex items-center gap-4">
-                                            <div class="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center">
-                                                <span class="text-2xl text-white" x-text="lihatDetail?.penilaian?.total_skor"></span>
-                                            </div>
-                                            <div>
-                                                <p class="text-gray-900">Total Skor Penilaian</p>
-                                                <p class="text-gray-500 text-sm">
-                                                    Dari rata-rata akurasi, kecepatan, dan kualitas
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="bg-gray-50 rounded-xl p-6">
-                                        <h3 class="text-gray-900 mb-4">Status Pembayaran</h3>
-                                        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full"
-                                            :class="{
-                                                        'text-green-800 bg-green-200' : lihatDetail?.status === 'sudah_dibayar',
-                                                        'text-red-800 bg-red-200' : lihatDetail?.status === 'belum_dibayar',
-                                                        }" x-text="lihatDetail?.status 
-                                                    ? lihatDetail.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) 
-                                                    : '-'"></span>
-
-                                        <template x-if="lihatDetail?.bukti_transfer">
-                                            <div>
-                                                <p class="text-sm text-gray-500 mb-2">Bukti Transfer:</p>
-
-                                                <img :src="'storage/'+ lihatDetail.bukti_transfer"
-                                                    class="rounded border max-h-60 mb-3">
-
-                                                <div class="bg-green-100 text-green-700 p-3 rounded">
-                                                    Pembayaran telah dikonfirmasi
-                                                </div>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </div>
-
-                                <div class="p-6 border-t border-gray-200 sticky bottom-0 bg-white">
-                                    <button @click="modalDetail = false" class="w-full px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                                        Tutup
-                                    </button>
+                                <div class="shrink-0">
+                                    <x-status-alpine status="p.status"></x-status-alpine>
                                 </div>
                             </div>
+
+                            <div class="grid grid-cols-2 gap-3 text-xs border-t border-slate-100 pt-3.5">
+                                <div>
+                                    <span class="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Halaman Kerja</span>
+                                    <p class="font-bold text-slate-800 mt-0.5" x-text="p.penilaian.pengambilan.dari_halaman + ' - ' + p.penilaian.pengambilan.sampai_halaman"></p>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Tanggal Selesai</span>
+                                    <p class="font-bold text-slate-800 mt-0.5" x-text="new Date(p.updated_at).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'})"></p>
+                                </div>
+                                <div class="col-span-2">
+                                    <span class="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Total Upah</span>
+                                    <p class="font-extrabold text-emerald-600 text-sm mt-0.5" x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(p.total_pembayaran)"></p>
+                                </div>
+                            </div>
+
+                            <button @click="openModal(p)" class="w-full text-center py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl transition text-xs font-bold">
+                                <i class="fas fa-eye mr-1.5"></i> Detail Evaluasi
+                            </button>
                         </div>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="7" class="px-6 py-8 text-center text-gray-500">
-                        Belum ada riwayat pekerjaan
-                    </td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
+                    </template>
+                </div>
+
+                <!-- TAMPILAN TABLET & DESKTOP (HIDDEN MD:BLOCK) -->
+                <div class="hidden md:block bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+                    <div class="px-6 py-5 border-b border-gray-200 bg-linear-to-r from-brand-500 to-brand-800 rounded-t-2xl">
+                        <h2 class="text-lg font-semibold text-white">
+                            Daftar Riwayat Pekerjaan
+                        </h2>
+                    </div>
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-xs font-bold text-brand-500 uppercase tracking-wider border-b border-slate-200">
+                                <th class="px-6 py-4">Nama Proyek</th>
+                                <th class="px-6 py-4 text-center">Rentang Halaman</th>
+                                <th class="px-6 py-4 text-center">Tanggal Selesai</th>
+                                <th class="px-6 py-4">Total Upah</th>
+                                <th class="px-6 py-4 text-center">Status Pembayaran</th>
+                                <th class="px-6 py-4 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-sm">
+                            <template x-for="p in group.items" :key="p.id">
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <p class="font-bold text-slate-800" x-text="p.penilaian.pengambilan.subsubproyeks.subproyeks.proyeks.nama_proyek"></p>
+                                        <p class="text-xs text-slate-500 mt-0.5">
+                                            <span x-text="p.penilaian.pengambilan.subsubproyeks.subproyeks.nama_sub_proyek"></span>
+                                            <span class="mx-1 text-slate-300">•</span>
+                                            <span x-text="p.penilaian.pengambilan.subsubproyeks.nama_halaman"></span>
+                                        </p>
+                                    </td>
+                                    <td class="px-6 py-4 text-center font-semibold text-slate-700" x-text="p.penilaian.pengambilan.dari_halaman + ' - ' + p.penilaian.pengambilan.sampai_halaman"></td>
+                                    <td class="px-6 py-4 text-center font-medium text-slate-500" x-text="new Date(p.updated_at).toLocaleDateString('id-ID', {day: '2-digit', month: '2-digit', year: 'numeric'})"></td>
+                                    <td class="px-6 py-4 font-bold text-emerald-600" x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(p.total_pembayaran)"></td>
+                                    <td class="px-6 py-4 text-center">
+                                        <x-status-alpine status="p.status"></x-status-alpine>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <x-secondary-button type="button" @click="openModal(p)">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="mr-2" height="20" width="20" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+                                                <path fill="currentColor" d="M320 144C254.8 144 201.2 173.6 160.1 211.7C121.6 247.5 95 290 81.4 320C95 350 121.6 392.5 160.1 428.3C201.2 466.4 254.8 496 320 496C385.2 496 438.8 466.4 479.9 428.3C518.4 392.5 545 350 558.6 320C545 290 518.4 247.5 479.9 211.7C438.8 173.6 385.2 144 320 144zM127.4 176.6C174.5 132.8 239.2 96 320 96C400.8 96 465.5 132.8 512.6 176.6C559.4 220.1 590.7 272 605.6 307.7C608.9 315.6 608.9 324.4 605.6 332.3C590.7 368 559.4 420 512.6 463.4C465.5 507.1 400.8 544 320 544C239.2 544 174.5 507.2 127.4 463.4C80.6 419.9 49.3 368 34.4 332.3C31.1 324.4 31.1 315.6 34.4 307.7C49.3 272 80.6 220 127.4 176.6zM320 400C364.2 400 400 364.2 400 320C400 290.4 383.9 264.5 360 250.7C358.6 310.4 310.4 358.6 250.7 360C264.5 383.9 290.4 400 320 400zM240.4 311.6C242.9 311.9 245.4 312 248 312C283.3 312 312 283.3 312 248C312 245.4 311.8 242.9 311.6 240.4C274.2 244.3 244.4 274.1 240.5 311.5zM286 196.6C296.8 193.6 308.2 192.1 319.9 192.1C328.7 192.1 337.4 193 345.7 194.7C346 194.8 346.2 194.8 346.5 194.9C404.4 207.1 447.9 258.6 447.9 320.1C447.9 390.8 390.6 448.1 319.9 448.1C258.3 448.1 206.9 404.6 194.7 346.7C192.9 338.1 191.9 329.2 191.9 320.1C191.9 309.1 193.3 298.3 195.9 288.1C196.1 287.4 196.2 286.8 196.4 286.2C208.3 242.8 242.5 208.6 285.9 196.7z" />
+                                            </svg>
+                                            Lihat Detail
+                                        </x-secondary-button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </template>
+
+        <!-- Tampilan Ketiadaan Riwayat -->
+        <template x-if="groupedPembayarans.length === 0">
+            <x-list-empty title="Tidak Ada Riwayat Pekerjaan" subtitle="Semua riwayat pekerjaan akan tampil disini">
+                <x-slot:icon>
+                    <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6M9 8h6m2 12H7a2 2 0 01-2-2V6a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V18a2 2 0 01-2 2z" />
+                    </svg>
+                </x-slot:icon>
+            </x-list-empty>
+        </template>
     </div>
+
+    <!-- MODAL DETAIL RIWAYAT PEKERJAAN (Tunggal di Luar Loop) -->
+    <x-modals.detail-riwayat-pekerjaan></x-modals.detail-riwayat-pekerjaan>
+
 </div>
+
+<!-- Alpine JS Controller -->
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('riwayatComponent', () => ({
+            pembayarans: @js($pembayarans),
+            modalDetail: false,
+            lihatDetail: null,
+
+            openModal(p) {
+                this.lihatDetail = p;
+                this.modalDetail = true;
+            },
+
+            // Menyaring dan mengelompokkan data secara real-time berdasarkan pencarian, bulan, dan tahun
+            get groupedPembayarans() {
+                // Pengelompokan data per Bulan-Tahun dari backend
+                let groups = {};
+                this.pembayarans.forEach(p => {
+                    let date = new Date(p.updated_at);
+                    let monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                    let key = monthNames[date.getMonth()] + ' ' + date.getFullYear();
+
+                    if (!groups[key]) {
+                        groups[key] = {
+                            monthYear: key,
+                            monthIndex: date.getMonth(),
+                            year: date.getFullYear(),
+                            items: []
+                        };
+                    }
+                    groups[key].items.push(p);
+                });
+
+                // Urutkan kelompok bulan terbaru di atas (descending)
+                return Object.values(groups).sort((a, b) => {
+                    if (b.year !== a.year) {
+                        return b.year - a.year;
+                    }
+                    return b.monthIndex - a.monthIndex;
+                });
+            }
+        }));
+    });
+</script>
 @endsection

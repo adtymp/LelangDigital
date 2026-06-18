@@ -5,7 +5,7 @@ window.Alpine = Alpine
 
 Alpine.start()
 
-console.log('APP JS ACTIVE');
+// console.log('APP JS ACTIVE');
 
 
 function startEchoListener() {
@@ -34,6 +34,24 @@ function startEchoListener() {
                 }
             }));
             console.log('PROYEK AKTIF', e);
+        })
+        
+        .listen('.nilai.tugas', (e) => {
+            window.dispatchEvent(new CustomEvent('notify', {
+                detail: {
+                    title: 'Tugas Selesai Dinilai ⭐',
+                    message: `Tugas Anda pada "${e.nama_sub_proyek}" telah dinilai dengan skor ${e.total_skor}`
+                }
+            }));
+        })
+        
+        .listen('.pembayaran.diunggah', (e) => {
+            window.dispatchEvent(new CustomEvent('notify', {
+                detail: {
+                    title: 'Pembayaran Ditransfer 💸',
+                    message: `Pembayaran proyek "${e.nama_proyek}" sebesar Rp ${new Intl.NumberFormat('id-ID').format(e.total_pembayaran)} telah dikirim!`
+                }
+            }));
         });
 }
 

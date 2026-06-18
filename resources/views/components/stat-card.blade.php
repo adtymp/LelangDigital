@@ -1,29 +1,29 @@
 @props([
 'title',
 'value',
+'text' => 'gray-600',
 'color' => 'gray',
+'shade' => '600',
 'bg' => 'white',
 'brdr' => 'gray'
 ])
 
-<div class="bg-{{ $bg }} rounded-xl p-6 border border-{{ $brdr }}-200 hover:border-b-8 hover:border-brand-200 hover:shadow-2xl transition">
+<div class="relative overflow-hidden bg-{{ $bg }} rounded-3xl p-6 border-2 border-{{ $brdr }}-200 hover:border-2 transition hover:-translate-y-1 hover:border-brand-300 hover:shadow-2xl">
 
-@isset($icon)
-    <div class="flex items-center justify-between mb-4">
-        <div class="w-12 h-12 bg-{{ $color }}-100 rounded-lg flex items-center justify-center">
-            <div class="text-{{ $color }}-600">
-                {{ $icon }}
-            </div>
+    @isset($icon)
+    <div class="w-12 h-12 bg-{{ $color }}-100 rounded-lg flex items-center justify-center">
+        <div class="text-{{ $color }}-{{ $shade }}">
+            {{ $icon }}
         </div>
     </div>
-@endisset
+    @endisset
 
-<p class="text-gray-500 text-sm mb-2">
-    {{ $title }}
-</p>
+    <p class="text-{{ $text }} font-medium text-sm mb-2">
+        {{ $title }}
+    </p>
 
-<p class="text-3xl text-{{ $color }}-600">
-    {{ $value }}
-</p>
-
+    <p class="text-3xl text-{{ $color }}-{{ $shade }} font-semibold">
+        {{ $value }}
+    </p>
+    <div class="absolute bottom-0 left-0 right-0 h-0 bg-brand-200 transition-all duration-200 group-hover:h-2"></div>
 </div>

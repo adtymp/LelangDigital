@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Events\ProyekAktifRealtime;
 use App\Mail\ProyekAktif;
+use App\Mail\ProyekAktifMail;
 use App\Models\Proyek;
 use App\Models\User;
 use Carbon\Carbon;
@@ -90,7 +91,7 @@ class UpdateStatusProyek extends Command
                 $cacheKeyAktif = "proyek_aktif_email_{$proyek->id}_{$freelancer->id}";
 
                 if (!Cache::has($cacheKeyAktif)) {
-                    Mail::to($freelancer->email)->queue(new ProyekAktif($freelancer, $proyek));
+                    Mail::to($freelancer->email)->queue(new ProyekAktifMail($freelancer, $proyek));
 
                     broadcast(new ProyekAktifRealtime($proyek, $freelancer));
 

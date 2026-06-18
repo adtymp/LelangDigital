@@ -16,7 +16,7 @@
 
     <x-sidebar :menus="$menus" :badges="$badges" />
 
-    <div class="lg:ml-64 p-4 transition-all duration-300">
+    <div class="lg:ml-64 p-3 sm:p-4 transition-all duration-300">
 
         <x-toast />
 

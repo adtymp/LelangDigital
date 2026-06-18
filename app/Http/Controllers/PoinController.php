@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PoinRequest;
 use App\Models\Pembayaran;
 use App\Models\Pengambilan;
 use App\Models\Poin;
@@ -31,7 +32,7 @@ class PoinController extends Controller
         }
 
         $poins = Poin::all();
-        $totalBobot = Poin::sum('bobot');
+        $totalBobot = Poin::where('status', 'aktif')->sum('bobot');
 
         return view('admin.pengaturan.poin', compact(
             'poins',
@@ -67,12 +68,9 @@ class PoinController extends Controller
         ));
     }
 
-    public function tambahAspek(Request $request)
+    public function tambahAspek(PoinRequest $request)
     {
-        $request->validate([
-            'aspek' => 'required|string|max:255',
-            'bobot' => 'required|numeric|between:0.01,1',
-        ]);
+        $request->validated();
 
         $bobotBaru = round($request->bobot * 100); // contoh 0.25 => 25
 
@@ -87,7 +85,6 @@ class PoinController extends Controller
 
             if ($poins->count() == 0) {
                 return response()->json([
-                    'success' => false,
                     'message' => 'Tidak bisa menambahkan bobot'
                 ], 422);
             }
@@ -111,7 +108,6 @@ class PoinController extends Controller
 
                 if ($newBobot < 0) {
                     return response()->json([
-                        'success' => false,
                         'message' => 'Bobot terlalu besar, menyebabkan nilai negatif'
                     ], 422);
                 }
@@ -155,13 +151,36 @@ class PoinController extends Controller
         ]);
     }
 
-    public function updateAspek(Request $request, Poin $poin)
+    public function updateAspek(PoinRequest $request, Poin $poin)
     {
-        $request->validate([
-            'aspek' => 'required|string',
-            'bobot' => 'required|numeric',
-            'status' => 'required'
-        ]);
+        $request->validated();
+
+        if (
+            $poin->aspek == $request->aspek &&
+            (float)$poin->bobot == (float)$request->bobot &&
+            $poin->status == $request->status
+        ) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ada perubahan data'
+            ], 422);
+        }
+
+        //total bobot setelah update
+        $totalAktif = Poin::where('status', 'aktif')
+            ->where('id', '!=', $poin->id)
+            ->sum('bobot');
+
+        if ($request->status === 'aktif') {
+            $totalAktif += $request->bobot;
+        }
+
+        if ($totalAktif > 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Total bobot aktif tidak boleh melebihi 1.00'
+            ], 422);
+        }
 
         $poin->update([
             'aspek' => $request->aspek,

@@ -3,224 +3,234 @@
 @section('content')
 <x-header
     :judul="'Riwayat Proyek'"
-    :subjudul="'Data Proyek yang telah selesai'" />
+    :subjudul="'Data proyek yang telah selesai atau dibatalkan'" />
 
-<form action="" method="GET">
-    <div class="bg-white rounded-xl border border-gray-200 p-5 mb-6 shadow-sm">
+<div x-data="{
+    modalPengambil : false,
+    pengambilans : [],
+    detail:{},
+    namaSubProyek : '' }">
 
-        <div class="flex flex-col md:flex-row md:items-end gap-4">
+    <!-- search -->
+    <x-search-filter
+        :action="route('riwayat.proyek')"
+        searchName="cari"
+        searchPlaceholder="Cari proyek..."
 
-            {{-- SEARCH --}}
-            <div class="flex-1 relative">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" viewBox="0 0 640 640" fill="currentColor">
-                    <path d="M480 272C480 317.9 465.1 360.3 440 394.7L566.6 521.4C579.1 533.9 579.1 554.2 566.6 566.7C554.1 579.2 533.8 579.2 521.3 566.7L394.7 440C360.3 465.1 317.9 480 272 480C157.1 480 64 386.9 64 272C64 157.1 157.1 64 272 64C386.9 64 480 157.1 480 272zM272 416C351.5 416 416 351.5 416 272C416 192.5 351.5 128 272 128C192.5 128 128 192.5 128 272C128 351.5 192.5 416 272 416z" />
-                </svg>
+        :filters="[
+        [
+            'name' => 'bulan',
+            'placeholder' => 'Pilih Bulan',
+            'options' => $bulanOptions
+        ],
+        [
+            'name' => 'tahun',
+            'placeholder' => 'Pilih Tahun',
+            'options' => $tahunOptions
+                ->mapWithKeys(fn($tahun) => [$tahun => $tahun])
+                ->toArray()
+        ]
+    ]" />
 
-                <input
-                    type="text"
-                    name="cari"
-                    value="{{ request('cari') }}"
-                    placeholder="Cari proyek..."
-                    class="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent">
-            </div>
+    <div class="space-y-8">
 
-            {{-- STATUS --}}
-            <div class="w-full md:w-52 relative">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" viewBox="0 0 640 640" fill="currentColor">
-                    <path d="M96 128C83.1 128 71.4 135.8 66.4 147.8C61.4 159.8 64.2 173.5 73.4 182.6L256 365.3L256 480C256 488.5 259.4 496.6 265.4 502.6L329.4 566.6C338.6 575.8 352.3 578.5 364.3 573.5C376.3 568.5 384 556.9 384 544L384 365.3L566.6 182.7C575.8 173.5 578.5 159.8 573.5 147.8C568.5 135.8 556.9 128 544 128L96 128z" />
-                </svg>
+        @forelse($groupedProyeks as $periode => $proyeks)
 
-                <select name="status"
-                    class="w-full pl-10 pr-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent bg-white">
-                    <option value="">Semua status</option>
-                    <option value="selesai" @selected(request('status')==='selesai' )>Selesai</option>
-                    <option value="dibatalkan" @selected(request('status')==='dibatalkan' )>Dibatalkan</option>
-                </select>
-            </div>
+        {{-- HEADER BULAN --}}
+        <div class="sticky top-0 z-10">
 
-            {{-- BUTTON --}}
-            <div class="w-full md:w-auto flex gap-2">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-linear-to-r from-brand-500 to-brand-700 text-white text-sm font-semibold">
 
-                <button type="submit"
-                    class="px-5 py-2.5 text-sm font-semibold bg-brand-500 text-white rounded-lg hover:bg-blue-700 transition w-full md:w-auto">
-                    Cari
-                </button>
-
-                {{-- RESET --}}
-                <a href="{{ url()->current() }}"
-                    class="px-5 py-2.5 text-sm font-semibold border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition text-center">
-                    Reset
-                </a>
-
-            </div>
-
-        </div>
-
-    </div>
-</form>
-
-@forelse($proyeks as $proyek)
-
-@php
-$totalPendapatan = $proyek->subproyeks->flatMap->subsubproyeks->flatMap->pengambilans->sum('total_harga');
-@endphp
-
-<div class="bg-white border border-gray-200 rounded-xl overflow-hidden mb-3"
-    x-data="{ openProyek: false }">
-
-    {{-- ROW PROYEK --}}
-    <div class="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-gray-50 transition"
-        @click="openProyek = !openProyek">
-        <div class="flex items-center gap-3">
-            <svg class="w-4 h-4 text-gray-400 transition-transform duration-200"
-                :class="openProyek ? 'rotate-90' : ''"
-                viewBox="0 0 20 20" fill="none">
-                <path d="M7 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-            <div>
-                <p class="text-sm font-semibold text-gray-800">{{ $proyek->nama_proyek }}</p>
-                <p class="text-xs text-gray-400 mt-0.5">
-                    {{ $proyek->tanggal_mulai->format('d M Y') }} – {{ $proyek->tanggal_selesai->format('d M Y') }}
-                </p>
+                {{ strtoupper($periode) }}
+                <span class="bg-white/20 px-2 py-1 rounded-lg text-xs">
+                    {{ $proyeks->count() }} proyek
+                </span>
             </div>
         </div>
-        <div class="flex items-center gap-3">
-            <span class="text-sm text-gray-500">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</span>
-            @if($proyek->status === 'selesai')
-            <span class="rounded-full px-2.5 py-1 text-xs bg-green-100 text-green-800">Selesai</span>
-            @else
-            <span class="rounded-full px-2.5 py-1 text-xs bg-red-100 text-red-800">Dibatalkan</span>
-            @endif
-        </div>
-    </div>
 
-    {{-- LEVEL 2: SUBPROYEK --}}
-    <div x-show="openProyek" x-transition x-cloak
-        class="border-t border-gray-100 bg-gray-50 p-4 space-y-3">
+        {{-- LOOP PROYEK DALAM BULAN --}}
+        @foreach($proyeks as $proyek)
 
-        @foreach($proyek->subproyeks as $sub)
-        <div class="bg-white border border-gray-200 rounded-lg overflow-hidden"
-            x-data="{ openSub: false }">
+        <div
+            x-data="{ openProyek : false }"
+            class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
 
-            {{-- ROW SUBPROYEK --}}
-            <div class="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-50 transition"
-                @click="openSub = !openSub">
-                <div class="flex items-center gap-2.5">
-                    <svg class="w-3.5 h-3.5 text-gray-400 transition-transform duration-200"
-                        :class="openSub ? 'rotate-90' : ''"
-                        viewBox="0 0 20 20" fill="none">
-                        <path d="M7 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <span class="text-sm font-medium text-gray-700">{{ $sub->nama_sub_proyek }}</span>
-                </div>
-                <span class="text-xs text-gray-400">{{ $sub->total_halaman }} hal</span>
-            </div>
+            {{-- HEADER --}}
+            <div
+                @click="openProyek = !openProyek"
+                class="p-6 cursor-pointer hover:bg-slate-50 transition">
 
-            {{-- LEVEL 3: SUBSUBPROYEK --}}
-            <div x-show="openSub" x-transition x-cloak
-                class="border-t border-gray-100 bg-gray-50 p-3 space-y-2">
+                <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5">
 
-                @foreach($sub->subsubproyeks as $sss)
-                <div class="bg-white border border-gray-200 rounded-lg overflow-hidden"
-                    x-data="{ openSss: false }">
+                    {{-- LEFT --}}
+                    <div class="flex items-start gap-4">
 
-                    {{-- ROW SUBSUBPROYEK --}}
-                    <div class="flex items-center justify-between px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition"
-                        @click="openSss = !openSss">
-                        <div class="flex items-center gap-2">
-                            <svg class="w-3 h-3 text-gray-400 transition-transform duration-200"
-                                :class="openSss ? 'rotate-90' : ''"
-                                viewBox="0 0 20 20" fill="none">
-                                <path d="M7 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center">
+
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="w-4 h-4 text-slate-500 transition duration-200"
+                                :class="openProyek ? 'rotate-90' : ''"
+                                viewBox="0 0 320 512"
+                                fill="currentColor">
+
+                                <path d="M96 96l128 160L96 416z" />
+
                             </svg>
-                            <span class="text-xs font-medium text-gray-700">{{ $sss->nama_subsubproyek }}</span>
+
                         </div>
-                        <div class="flex items-center gap-3 text-xs text-gray-400">
-                            <span>{{ $sss->total_halaman }} hal</span>
-                            <span>Rp {{ number_format($sss->total_halaman * $sss->harga_perlembar, 0, ',', '.') }}</span>
-                            <span class="text-gray-300">|</span>
-                            <span class="text-blue-500">{{ $sss->pengambilans->count() }} pengambil</span>
+
+                        <div>
+
+                            <div class="flex flex-wrap items-center gap-3">
+
+                                <h2 class="text-lg font-bold text-slate-800">
+                                    {{ $proyek->nama_proyek }}
+                                </h2>
+
+                                <x-status :value="$proyek->status" />
+
+                            </div>
+
+                            <p class="mt-2 text-sm text-slate-500">
+
+                                {{ $proyek->tanggal_mulai->format('d M Y') }}
+                                —
+                                {{ $proyek->tanggal_selesai->format('d M Y') }}
+
+                            </p>
+
                         </div>
+
                     </div>
 
-                    {{-- LEVEL 4: TABEL PENGAMBILAN --}}
-                    <div x-show="openSss" x-transition x-cloak
-                        class="border-t border-gray-100 bg-gray-50 p-3">
+                    {{-- RIGHT --}}
+                    <div class="grid grid-cols-2 gap-3">
 
-                        {{-- CHIPS RINGKASAN --}}
-                        <div class="flex gap-2 mb-3 flex-wrap">
-                            <span class="text-xs bg-white border border-gray-200 rounded-md px-2.5 py-1 text-gray-500">
-                                <span class="font-medium text-gray-700">{{ $sss->pengambilans->count() }}</span> pengambil
-                            </span>
-                            <span class="text-xs bg-white border border-gray-200 rounded-md px-2.5 py-1 text-gray-500">
-                                Total <span class="font-medium text-gray-700">{{ $sss->pengambilans->sum('total_halaman') }}</span> hal
-                            </span>
-                            <span class="text-xs bg-white border border-gray-200 rounded-md px-2.5 py-1 text-gray-500">
-                                Pendapatan <span class="font-medium text-gray-700">Rp {{ number_format($sss->pengambilans->sum('total_harga'), 0, ',', '.') }}</span>
-                            </span>
+                        <div class="bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 min-w-40">
+
+                            <p class="text-xs font-medium text-slate-500">
+                                Upah Dibayar
+                            </p>
+
+                            <p class="mt-1 text-lg font-bold text-emerald-600">
+
+                                Rp {{ number_format($proyek->total_pendapatan,0,',','.') }}
+
+                            </p>
+
                         </div>
 
-                        {{-- TABEL --}}
-                        @if($sss->pengambilans->count() > 0)
-                        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                            <table class="w-full text-xs">
-                                <thead class="bg-gray-50 text-gray-500">
-                                    <tr>
-                                        <th class="px-3 py-2 text-left w-6">#</th>
-                                        <th class="px-3 py-2 text-left">Nama user</th>
-                                        <th class="px-3 py-2 text-center">Dari hal</th>
-                                        <th class="px-3 py-2 text-center">Sampai hal</th>
-                                        <th class="px-3 py-2 text-center">Total harga</th>
-                                        <th class="px-3 py-2 text-center">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-100">
-                                    @foreach($sss->pengambilans->sortBy('dari_halaman') as $index => $ambil)
-                                    <tr class="hover:bg-gray-50 transition">
-                                        <td class="px-3 py-2 text-gray-400">{{ $index + 1 }}</td>
-                                        <td class="px-3 py-2 font-medium text-gray-700">{{ $ambil->user->name }}</td>
-                                        <td class="px-3 py-2 text-center">{{ $ambil->dari_halaman }}</td>
-                                        <td class="px-3 py-2 text-center">{{ $ambil->sampai_halaman }}</td>
-                                        <td class="px-3 py-2 text-center">Rp {{ number_format($ambil->total_harga, 0, ',', '.') }}</td>
-                                        <td class="px-3 py-2 text-center">
-                                            @if($ambil->status === 'selesai')
-                                            <span class="rounded-full px-2 py-0.5 text-[10px] bg-green-100 text-green-800">Selesai</span>
-                                            @elseif($ambil->status === 'diambil')
-                                            <span class="rounded-full px-2 py-0.5 text-[10px] bg-blue-100 text-blue-800">Diambil</span>
-                                            @elseif($ambil->status === 'menunggu')
-                                            <span class="rounded-full px-2 py-0.5 text-[10px] bg-yellow-100 text-yellow-800">Menunggu</span>
-                                            @elseif($ambil->status === 'dibatalkan')
-                                            <span class="rounded-full px-2 py-0.5 text-[10px] bg-red-100 text-red-800">Dibatalkan</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                        <div class="bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 min-w-40">
+
+                            <p class="text-xs font-medium text-slate-500">
+                                Freelancer
+                            </p>
+
+                            <p class="mt-1 text-lg font-bold text-blue-600">
+
+                                {{ $proyek->total_pengambil }}
+
+                            </p>
+
                         </div>
-                        @else
-                        <p class="text-center text-xs text-gray-400 py-4">Belum ada pengambilan untuk subsubproyek ini</p>
-                        @endif
 
                     </div>
+
                 </div>
-                @endforeach
 
             </div>
+
+            {{-- CONTENT --}}
+            <div
+                x-show="openProyek"
+                x-transition
+                x-cloak
+                class="border-t border-slate-100 bg-slate-50 p-5">
+
+                <div class="space-y-4">
+                    @foreach($proyek->subproyeks as $sub)
+
+                    @foreach($sub->subsubproyeks as $sss)
+
+                    @php
+                    $pengambilAktif = $sss->pengambilans
+                    ->whereIn('status', ['diambil', 'menunggu', 'selesai']);
+                    @endphp
+
+                    <div class="bg-white rounded-2xl border border-slate-200 p-5 hover:border-brand-300 hover:shadow-md transition">
+                        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+                            <div>
+                                <p class="text-sm font-semibold text-slate-800">
+                                    {{ $sub->nama_sub_proyek }}
+                                </p>
+                                <p class="text-xs font-semibold text-slate-400 mt-1">
+                                    {{ $sss->nama_halaman }}
+                                </p>
+                            </div>
+
+                            <div class="flex flex-wrap gap-2 mt-4">
+                                <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs">
+                                    {{ $sss->total_halaman }} halaman
+                                </span>
+
+                                <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs">
+                                    {{ $pengambilAktif->count() }} pengambil
+                                </span>
+
+                                <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs">
+                                    Rp {{ number_format($pengambilAktif->sum('total_harga'),0,',','.') }}
+                                </span>
+                            </div>
+
+                            <div>
+                                <x-secondary-button
+                                    @click.stop="
+                                    modalPengambil = true;
+                                    detail ={
+                                        proyek: '{{ $proyek->nama_proyek }}',
+                                        subproyek: '{{ $sub->nama_sub_proyek }}',
+                                        nama: '{{ $sss->nama_halaman }}',
+                                        kualitas: '{{ $sss->kualitas }}',
+                                        total_halaman: {{ $sss->total_halaman }},
+                                        harga_perlembar: {{ $sss->harga_perlembar }},
+                                        subtotal: {{ $sss->total_halaman * $sss->harga_perlembar }},
+                                        pengambilans: {{ Js::from($sss->pengambilans) }}
+                                    };">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="mr-2" height="20" width="20" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+                                        <path fill="currentColor" d="M320 144C254.8 144 201.2 173.6 160.1 211.7C121.6 247.5 95 290 81.4 320C95 350 121.6 392.5 160.1 428.3C201.2 466.4 254.8 496 320 496C385.2 496 438.8 466.4 479.9 428.3C518.4 392.5 545 350 558.6 320C545 290 518.4 247.5 479.9 211.7C438.8 173.6 385.2 144 320 144zM127.4 176.6C174.5 132.8 239.2 96 320 96C400.8 96 465.5 132.8 512.6 176.6C559.4 220.1 590.7 272 605.6 307.7C608.9 315.6 608.9 324.4 605.6 332.3C590.7 368 559.4 420 512.6 463.4C465.5 507.1 400.8 544 320 544C239.2 544 174.5 507.2 127.4 463.4C80.6 419.9 49.3 368 34.4 332.3C31.1 324.4 31.1 315.6 34.4 307.7C49.3 272 80.6 220 127.4 176.6zM320 400C364.2 400 400 364.2 400 320C400 290.4 383.9 264.5 360 250.7C358.6 310.4 310.4 358.6 250.7 360C264.5 383.9 290.4 400 320 400zM240.4 311.6C242.9 311.9 245.4 312 248 312C283.3 312 312 283.3 312 248C312 245.4 311.8 242.9 311.6 240.4C274.2 244.3 244.4 274.1 240.5 311.5zM286 196.6C296.8 193.6 308.2 192.1 319.9 192.1C328.7 192.1 337.4 193 345.7 194.7C346 194.8 346.2 194.8 346.5 194.9C404.4 207.1 447.9 258.6 447.9 320.1C447.9 390.8 390.6 448.1 319.9 448.1C258.3 448.1 206.9 404.6 194.7 346.7C192.9 338.1 191.9 329.2 191.9 320.1C191.9 309.1 193.3 298.3 195.9 288.1C196.1 287.4 196.2 286.8 196.4 286.2C208.3 242.8 242.5 208.6 285.9 196.7z" />
+                                    </svg>
+                                    Lihat Pengambil
+                                </x-secondary-button>
+                                {{-- MODAL --}}
+                                <x-modals.detail-riwayat-proyek></x-modals.detail-riwayat-proyek>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+
+                    @endforeach
+                </div>
+
+            </div>
+
         </div>
+
         @endforeach
 
+        @empty
+
+        <x-list-empty title="Tidak Ada Riwayat" subtitle="Semua proyek yang telah selesai akan muncul disini">
+                <x-slot:icon>
+                    <svg class="w-10 h-10 text-gray-400"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6M9 8h6m2 12H7a2 2 0 01-2-2V6a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V18a2 2 0 01-2 2z" />
+                    </svg>
+                </x-slot:icon>
+            </x-list-empty>
+
+        @endforelse
+
     </div>
-</div>
-
-@empty
-<div class="text-center py-16 text-gray-400 bg-white border border-gray-200 rounded-xl overflow-hidden mb-3">
-    <p class="text-lg mb-1">Belum ada riwayat proyek</p>
-    <p class="text-sm">Proyek yang selesai atau dibatalkan akan muncul di sini</p>
-</div>
-@endforelse
 
 </div>
-</div>
-
 @endsection

@@ -27,7 +27,7 @@ class AktifUserMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Pengaktifan User',
+            subject: 'Pengaktifan Akun User',
         );
     }
 

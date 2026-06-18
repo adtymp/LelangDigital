@@ -1,14 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterUser;
-use App\Mail\NotifikasiPendaftaran;
+use App\Mail\NotifikasiPendaftaranMail;
 use App\Models\Level;
 use App\Models\Portofolio;
-use App\Models\Rekening;
 use App\Models\User;
-use App\Rules\TerimaDomainPortofolio;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +20,7 @@ class LoginController extends Controller
     private function redirectByRole($user)
     {
         if ($user->hasRole('admin')) {
-            return redirect()->route('dashboard.admin');
+            return redirect()->route('dashboard.admin')->with('succes', 'Anda berhasil login');
         }
 
         if ($user->hasRole('freelancer')) {
@@ -53,7 +52,7 @@ class LoginController extends Controller
                 return redirect()->route('rekening.form');
             }
 
-            return redirect()->route('dashboard.freelance');
+            return redirect()->route('dashboard.freelance')->with('succes', 'Anda berhasil login');
         }
 
         Auth::logout();
@@ -155,7 +154,7 @@ class LoginController extends Controller
 
             Portofolio::create($portofolio);
 
-            Mail::to(env('ADMIN_EMAIL'))->queue(new NotifikasiPendaftaran($user));
+            Mail::to(env('ADMIN_EMAIL'))->queue(new NotifikasiPendaftaranMail($user));
 
             DB::commit();
 

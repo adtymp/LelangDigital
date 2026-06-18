@@ -1,51 +1,102 @@
-<div class="fixed top-4 right-4 z-50 space-y-4">
-    {{-- Success Toast --}}
-    @if (session('success'))
-    <div
-        x-data="{ show: true }"
-        x-init="setTimeout(() => show = false, 4000)"
-        x-show="show"
-        x-transition
-        class="bg-green-100 border border-green-400 text-green-700 px-6 py-4 rounded shadow-lg relative w-80"
-        role="alert">
-        <strong class="font-bold">Sukses! </strong>
-        <span class="block sm:inline">{{ session('success') }}</span>
-        <button
-            @click="show = false"
-            class="absolute top-1 right-2 text-green-700">
-            <svg class="fill-current h-5 w-5" xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20">
-                <title>Close</title>
-                <path d="M14.348 5.652a1 1 0 0 0-1.414 0L10 8.586 7.066 5.652a1 1 0 1 0-1.414 1.414L8.586 10l-2.934 2.934a1 1 0 1 0 1.414 1.414L10 11.414l2.934 2.934a1 1 0 0 0 1.414-1.414L11.414 10l2.934-2.934a1 1 0 0 0 0-1.414z" />
-            </svg>
-        </button>
-    </div>
-    @endif
+<div
+    x-data="{
+        notifications: [],
 
-    {{-- Error Toast --}}
-    @if ($errors->any())
-    <div
-        x-data="{ show: true }"
-        x-init="setTimeout(() => show = false, 6000)"
-        x-show="show"
-        x-transition
-        class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded shadow-lg relative w-80"
-        role="alert">
-        <strong class="font-bold">Terjadi kesalahan:</strong>
-        <ul class="list-disc pl-5 text-sm mt-1">
-            @foreach ($errors->all() as $error)
-            <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-        <button
-            @click="show = false"
-            class="absolute top-1 right-2 text-red-700">
-            <svg class="fill-current h-5 w-5" xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20">
-                <title>Close</title>
-                <path d="M14.348 5.652a1 1 0 0 0-1.414 0L10 8.586 7.066 5.652a1 1 0 1 0-1.414 1.414L8.586 10l-2.934 2.934a1 1 0 1 0 1.414 1.414L10 11.414l2.934 2.934a1 1 0 0 0 1.414-1.414L11.414 10l2.934-2.934a1 1 0 0 0 0-1.414z" />
-            </svg>
-        </button>
-    </div>
-    @endif
+        show(type, message) {
+
+            let id = Date.now()
+
+            this.notifications.push({
+                id,
+                type,
+                message,
+                visible: true
+            })
+
+            setTimeout(() => {
+                this.remove(id)
+            }, 4000)
+        },
+
+        remove(id) {
+            let notif = this.notifications.find(n => n.id === id)
+
+            if (notif) notif.visible = false
+
+            setTimeout(() => {
+                this.notifications = this.notifications.filter(n => n.id !== id)
+            }, 300)
+        }
+    }"
+
+    x-init="
+        @if(session('success'))
+            show('success', '{{ session('success') }}')
+        @endif
+
+        @if(session('error'))
+            show('error', '{{ session('error') }}')
+        @endif
+
+        @if($errors->any())
+        show('error', '{{ $errors->first() }}')
+        @endif
+    "
+
+    @toast.window="show($event.detail.type, $event.detail.message)"
+
+    class="fixed top-4 right-4 z-[9999] space-y-3 w-full max-w-sm">
+
+    <template x-for="item in notifications" :key="item.id">
+
+        <div
+            x-show="item.visible"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-2"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0 translate-y-2"
+
+            class="relative overflow-hidden rounded-2xl border shadow-xl backdrop-blur-sm p-4 pr-10"
+
+            :class="{
+                'bg-emerald-50 border-emerald-200 text-emerald-700': item.type === 'success',
+                'bg-red-50 border-red-200 text-red-700': item.type === 'error'
+            }">
+
+            <div class="flex items-start gap-3">
+
+                <div class="mt-0.5">
+
+                    <template x-if="item.type === 'success'">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                    </template>
+
+                    <template x-if="item.type === 'error'">
+                        <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                    </template>
+
+                </div>
+
+                <div class="flex-1">
+                    <p class="font-semibold"
+                        x-text="item.type === 'success' ? 'Berhasil' : 'Terjadi Kesalahan'">
+                    </p>
+
+                    <p class="text-sm mt-1 opacity-90" x-text="item.message"></p>
+                </div>
+
+            </div>
+
+            <button
+                @click="remove(item.id)"
+                class="absolute top-3 right-3 opacity-60 hover:opacity-100 transition">
+
+                ✕
+            </button>
+
+        </div>
+
+    </template>
 </div>

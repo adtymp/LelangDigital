@@ -1,7 +1,6 @@
-```blade id="k8qq9m"
 <x-mail::message>
 
-# 🚀 Proyek Baru Tersedia
+# Proyek Baru Tersedia
 
 Halo, **{{ $user->name }}**
 
@@ -10,6 +9,15 @@ Terdapat proyek baru yang saat ini telah tersedia untuk Anda lihat pada sistem.
 ---
 
 ## Detail Proyek
+
+<x-mail::table>
+| Informasi | Detail |
+|:-----------|:--------|
+| Nama | {{ $proyek->nama_proyek }} |
+| Email | {{ $proyek->tanggal_mulai->format('d M Y H:i') }} WIB |
+| No Telepon | {{ $proyek->tanggal_selesai->format('d M Y H:i') }} WIB |
+| Status | {{ $proyek->status }} |
+</x-mail::table>
 
 <x-mail::panel>
 
@@ -27,14 +35,12 @@ Terdapat proyek baru yang saat ini telah tersedia untuk Anda lihat pada sistem.
 
 </x-mail::panel>
 
-Silakan login ke sistem untuk melihat detail proyek dan mengajukan penawaran.
+Silakan login ke sistem untuk melihat detail proyek dan mengajukan pekerjaan.
 
 <x-mail::button :url="url('/login')" color="primary">
 Login ke Sistem
 </x-mail::button>
 
 Terima kasih,<br>
-**{{ config('app.name') }}**
 
 </x-mail::message>
-```

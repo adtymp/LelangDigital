@@ -1,15 +1,45 @@
 @extends('layouts.body', ['title' => 'Dashboard'])
 
 @section('content')
+
+@php
+$delay = $level?->delay_notifikasi ?? 0;
+
+// Formula kata-kata keunggulan berdasarkan menit delay notifikasi
+$keunggulanText = $delay == 0
+? "Akses Proyek Instan! Anda melihat proyek baru secara real-time tanpa penundaan waktu."
+: "Notifikasi proyek tertunda {$delay} menit.";
+@endphp
+
 <x-header
     :judul="'Dashboard Freelancer'"
-    :subjudul="'Level ' . $user->level->nama_level . ' | Notifikasi pada 21.00'" />
+    :subjudul="'Level ' . $level?->nama_level . ' • ' . $keunggulanText" />
 
+<div x-data="resetCountdown()" x-init="startCountdown()">
+
+    @if($resetLevel)
+    <div class="mt-4 bg-white border border-gray-200 rounded-2xl p-4 mb-5 shadow">
+
+        <p class="text-sm text-gray-500 mb-1">
+            Reset level berikutnya
+        </p>
+
+        <p x-text="countdown"
+            class="text-xl font-semibold text-brand-500">
+        </p>
+
+    </div>
+    @endif
+
+</div>
+
+<!-- statcard -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
     <x-stat-card
         title="Proyek Aktif"
         :value="$proyekAktif"
-        color="blue">
+        color="blue"
+        shade="600">
         <x-slot:icon>
             <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 640 640">
                 <path fill="currentColor" d="M129.5 464L179.5 304L558.9 304L508.9 464L129.5 464zM320.2 512L509 512C530 512 548.6 498.4 554.8 478.3L604.8 318.3C614.5 287.4 591.4 256 559 256L179.6 256C158.6 256 140 269.6 133.8 289.7L112.2 358.4L112.2 160C112.2 151.2 119.4 144 128.2 144L266.9 144C270.4 144 273.7 145.1 276.5 147.2L314.9 176C328.7 186.4 345.6 192 362.9 192L480.2 192C489 192 496.2 199.2 496.2 208L544.2 208C544.2 172.7 515.5 144 480.2 144L362.9 144C356 144 349.2 141.8 343.7 137.6L305.3 108.8C294.2 100.5 280.8 96 266.9 96L128.2 96C92.9 96 64.2 124.7 64.2 160L64.2 448C64.2 483.3 92.9 512 128.2 512L320.2 512z" />
@@ -20,7 +50,8 @@
     <x-stat-card
         title="Tugas Selesai"
         :value="$proyekSelesai"
-        color="orange">
+        color="yellow"
+        shade="600">
         <x-slot:icon>
             <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 640 640">
                 <path fill="currentColor" d="M128 464L512 464C520.8 464 528 456.8 528 448L528 208C528 199.2 520.8 192 512 192L362.7 192C345.4 192 328.5 186.4 314.7 176L276.3 147.2C273.5 145.1 270.2 144 266.7 144L128 144C119.2 144 112 151.2 112 160L112 448C112 456.8 119.2 464 128 464zM512 512L128 512C92.7 512 64 483.3 64 448L64 160C64 124.7 92.7 96 128 96L266.7 96C280.5 96 294 100.5 305.1 108.8L343.5 137.6C349 141.8 355.8 144 362.7 144L512 144C547.3 144 576 172.7 576 208L576 448C576 483.3 547.3 512 512 512z" />
@@ -31,6 +62,7 @@
     <x-stat-card
         title="Total Pendapatan"
         :value="'Rp. '. number_format($pendapatan, 0, ',', '.')"
+        shade="600"
         color="green">
         <x-slot:icon>
             <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 640 640">
@@ -41,50 +73,33 @@
 </div>
 
 <!-- search -->
-<div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-        {{-- Search --}}
-        <div class="relative">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                viewBox="0 0 640 640" fill="currentColor">
-                <path d="M480 272C480 317.9 465.1 360.3 440 394.7L566.6 521.4C579.1 533.9 579.1 554.2 566.6 566.7C554.1 579.2 533.8 579.2 521.3 566.7L394.7 440C360.3 465.1 317.9 480 272 480C157.1 480 64 386.9 64 272C64 157.1 157.1 64 272 64C386.9 64 480 157.1 480 272zM272 416C351.5 416 416 351.5 416 272C416 192.5 351.5 128 272 128C192.5 128 128 192.5 128 272C128 351.5 192.5 416 272 416z" />
-            </svg>
-
-            <input
-                type="text"
-                placeholder="Cari proyek..."
-                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
-        </div>
-
-        {{-- Filter Harga --}}
-        <div class="relative">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                viewBox="0 0 640 640" fill="currentColor">
-                <path d="M96 128C83.1 128 71.4 135.8 66.4 147.8C61.4 159.8 64.2 173.5 73.4 182.6L256 365.3L256 480C256 488.5 259.4 496.6 265.4 502.6L329.4 566.6C338.6 575.8 352.3 578.5 364.3 573.5C376.3 568.5 384 556.9 384 544L384 365.3L566.6 182.7C575.8 173.5 578.5 159.8 573.5 147.8C568.5 135.8 556.9 128 544 128L96 128z" />
-            </svg>
-
-            <select
-                class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent appearance-none bg-white">
-                <option value="all">Semua Harga</option>
-                <option value="low">&lt; Rp 1.000</option>
-                <option value="medium">Rp 1.000 - Rp 3.000</option>
-                <option value="high">&gt; Rp 3.000</option>
-            </select>
-
-            {{-- Icon panah dropdown --}}
-            <svg xmlns="http://www.w3.org/2000/svg"
-                class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M19 9l-7 7-7-7" />
-            </svg>
-        </div>
-
-    </div>
-</div>
+<x-search-filter
+    :action="route('dashboard.freelance')"
+    searchName="search"
+    searchPlaceholder="Cari proyek..."
+    :filters="[
+        [
+            'name' => 'kualitas',
+            'placeholder' => 'Semua Kualitas',
+            'options' => [
+                '2' => 'Sangat Kurang',
+                '4' => 'Kurang',
+                '6' => 'Sedang',
+                '8' => 'Baik',
+                '10' => 'Sangat Baik',
+            ]
+        ],
+        [
+            'name' => 'sort',
+            'placeholder' => 'Urutkan',
+            'options' => [
+                'terbaru' => 'Terbaru',
+                'terlama' => 'Terlama',
+                'deadline' => 'Deadline Terdekat',
+                'halaman_terbanyak' => 'Halaman Tersedia Terbanyak',
+            ]
+        ]
+    ]" />
 
 <div class="items-center justify-center grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
     @forelse ($proyeks as $proyek)
@@ -159,8 +174,15 @@
 
             <div class="flex justify-between">
                 <span class="text-gray-500">Deadline</span>
-                <span class="font-semibold text-red-500">
+                <span class="font-semibold text-red-600">
                     {{ $proyek->tanggal_selesai->format('d M Y H:i') }}
+                </span>
+            </div>
+
+            <div class="flex justify-between">
+                <span class="text-gray-500">Halaman Tersedia</span>
+                <span class="font-semibold text-green-600">
+                    {{ $sss->sisa_halaman }} Halaman
                 </span>
             </div>
 
@@ -175,11 +197,108 @@
     @endforeach
     @endforeach
     @empty
-    <div class="col-span-full bg-white rounded-xl border border-gray-200 p-8 text-center">
-        <p class="text-gray-500">Tidak ada proyek yang tersedia</p>
-    </div>
+    <x-list-empty title="Tidak Ada Proyek Tersedia" subtitle="Semua proyek aktif akan tampil disini">
+        <x-slot:icon>
+            <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6M9 8h6m2 12H7a2 2 0 01-2-2V6a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V18a2 2 0 01-2 2z" />
+            </svg>
+        </x-slot:icon>
+    </x-list-empty>
     @endforelse
 </div>
-</div>
-</div>
+
+<script>
+    function resetCountdown() {
+        return {
+            resetLevel: @json($resetLevel),
+            countdown: '',
+            countdownInterval: null,
+            sedangSinkron: false,
+
+            async startCountdown() {
+                //Hindari interval dobel
+
+                if (this.countdownInterval) {
+                    clearInterval(this.countdownInterval)
+                }
+
+                this.countdownInterval = setInterval(async () => {
+
+                    //Belum pernah reset
+
+                    if (!this.resetLevel.last_reset_at) {
+
+                        this.countdown = 'Belum ada reset';
+
+                        return;
+                    }
+
+                    //Hitung reset berikutnya
+
+                    let lastReset = new Date(this.resetLevel.last_reset_at);
+
+                    let nextReset = new Date(lastReset);
+
+                    nextReset.setDate(
+                        nextReset.getDate() +
+                        parseInt(this.resetLevel.lama_hari)
+                    );
+
+                    let jam = this.resetLevel.jam_reset.split(':');
+
+                    nextReset.setHours(parseInt(jam[0]));
+                    nextReset.setMinutes(parseInt(jam[1]));
+                    nextReset.setSeconds(0);
+
+                    let sekarang = new Date();
+
+                    let diff = nextReset - sekarang;
+
+                    //waktu reset
+
+                    if (diff <= 0) {
+
+                        this.countdown = 'Sedang sinkronisasi reset...';
+
+                        if (!this.sedangSinkron) {
+
+                            this.sedangSinkron = true;
+
+                            try {
+
+                                await this.ambilResetTerbaru();
+
+                            } finally {
+
+                                this.sedangSinkron = false;
+                            }
+                        }
+
+                        return;
+                    }
+
+                    let hari = Math.floor(
+                        diff / (1000 * 60 * 60 * 24)
+                    );
+
+                    let jamSisa = Math.floor(
+                        (diff / (1000 * 60 * 60)) % 24
+                    );
+
+                    let menit = Math.floor(
+                        (diff / (1000 * 60)) % 60
+                    );
+
+                    let detik = Math.floor(
+                        (diff / 1000) % 60
+                    );
+
+                    this.countdown =
+                        `${hari} hari ${jamSisa} jam ${menit} menit ${detik} detik`;
+
+                }, 1000);
+            },
+        }
+    }
+</script>
 @endsection

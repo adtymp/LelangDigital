@@ -1,9 +1,10 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\BadgeController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\LevelController;
-use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ManajemenFreelancerController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\PengambilanController;
@@ -24,6 +25,25 @@ Route::get('/test-email', function () {
     return 'Email test berhasil dikirim';
 });
 
+use App\Mail\AktifUserMail;
+use App\Mail\ProyekAktifMail;
+use App\Mail\TerimaUserMail;
+use App\Mail\TolakUserMail;
+use App\Mail\UploadPembayaranMail;
+use App\Models\Pembayaran;
+use App\Models\Proyek;
+use App\Models\User;
+
+Route::get('/preview-email', function () {
+
+    $user = User::first();
+    $proyek = Proyek::first();
+    $pembayaran = Pembayaran::first();
+
+    return new UploadPembayaranMail($user, $pembayaran);
+});
+
+
 Route::get('', function () {
     return view('welcome');
 });
@@ -39,6 +59,9 @@ Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('google.
 Route::get('/auth/google/callback', [GoogleController::class, 'callback']);
 
 Route::middleware(['auth'])->group(function () {
+
+    Route::get('/api/badges', [BadgeController::class, 'index'])->name('api.badges');
+
     Route::get('/lengkapi-google', [GoogleController::class, 'formLengkapi'])->name('google.lengkapi');
 
     Route::post('/lengkapi-google', [GoogleController::class, 'simpanLengkapi'])->name('google.lengkapi.store');
@@ -62,8 +85,6 @@ Route::middleware(['role:admin'])->group(function () {
 
     Route::get('tambah-proyek', [ProyekController::class, 'halamanFormProyek'])->name('proyek.halaman');
 
-    // Route::post('/ajax/cek-halaman', [FreelanceDashController::class, 'cekHalaman'])->name('ajax.cekHalaman');
-
     Route::post('tambah-proyek/tambah', [ProyekController::class, 'tambahProyek'])->name('proyek.add');
 
     Route::get('tambah-proyek/{proyek}', [ProyekController::class, 'editProyek'])->name('proyek.edit');
@@ -78,11 +99,13 @@ Route::middleware(['role:admin'])->group(function () {
 
     Route::get('manajemen-freelancer', [ManajemenFreelancerController::class, 'halamanFreelancer'])->name('freelancer.halaman');
 
+    Route::get('manajemen-freelancer/{user}/download-portofolio', [ManajemenFreelancerController::class, 'filePortofolio'])->name('portofolio.download');
+
     Route::post('manajemen-freelancer/{user}/status-verifikasi', [ManajemenFreelancerController::class, 'updateStatusVerifikasi'])->name('freelancer.update-verifikasi');
 
     Route::post('manajemen-freelancer/{user}/status-akun', [ManajemenFreelancerController::class, 'updateStatusAkun'])->name('freelancer.update-akun');
 
-    Route::get('penilaian', [PenilaianController::class, 'index'])->name('penilaian.view');
+    Route::get('penilaian', [PenilaianController::class, 'halamanPenilaian'])->name('penilaian.view');
 
     Route::get('penilaian/{id}/download/hasil', [PenilaianController::class, 'downloadHasilTugas'])->name('penilaian.downloadHasilTugas');
 
@@ -102,7 +125,7 @@ Route::middleware(['role:admin'])->group(function () {
 
     Route::post('pengaturan-level/update-reset', [ResetLevelController::class, 'updateReset'])->name('reset.update');
 
-    Route::post('pengaturan-level', [LevelController::class, 'tambahLevel']);
+    Route::post('pengaturan-level/proses-tambah', [LevelController::class, 'tambahLevel'])->name('level.tambah');
 
     Route::delete('pengaturan-level/{level}', [LevelController::class, 'hapusLevel']);
 
@@ -111,6 +134,8 @@ Route::middleware(['role:admin'])->group(function () {
     Route::get('/pengaturan-level/reset-status', [ResetLevelController::class, 'statusReset']);
 
     Route::get('simulasi', [PoinController::class, 'halamanSimulasi'])->name('simulasi.lihat');
+
+    Route::get('pembayaran/{id}', [PembayaranController::class, 'detailPembayaran'])->name('pembayaran.detail');
 
     Route::get('pembayaran', [PembayaranController::class, 'halamanPembayaran'])->name('pembayaran.lihat');
 
@@ -132,11 +157,23 @@ Route::middleware(['role:freelancer'])->group(function () {
 
     Route::post('proyek/ambil/{subsub}/proses', [PengambilanController::class, 'ambilTugas'])->name('freelance.ambil.proses');
 
+    Route::get('proyek/ambil/{subsub}/download/pdf', [PengambilanController::class, 'downloadPdfSubsubproyek'])
+        ->name('freelancer.downloadPdfSubsubproyek');
+
+    Route::get('proyek/ambil/{subsub}/download/xls', [PengambilanController::class, 'downloadTemplateSubsubproyek'])
+        ->name('freelancer.downloadTemplateSubsubproyek');
+
+    Route::get('/download-zip', [PengambilanController::class, 'downloadZip'])->name('freelance.download.zip');
+
     Route::get('profil-saya', [ManajemenFreelancerController::class, 'profilSaya'])->name('profil.freelance');
 
     Route::post('profil-saya/{user}/update-telepon', [ManajemenFreelancerController::class, 'updateTelepon'])->name('profil.updateTelepon');
 
     Route::post('profil-saya/{user}/update-password', [ManajemenFreelancerController::class, 'updatePassword'])->name('profil.updatePassword');
+
+    Route::put('profil/{user}/update-rekening', [ManajemenFreelancerController::class, 'updateRekening'])->name('profil.updateRekening');
+
+    Route::put('profil/{user}/update-portofolio', [ManajemenFreelancerController::class, 'updatePortofolio'])->name('profil.updatePortofolio');
 
     Route::get('upload-tugas', [PengambilanController::class, 'halamanUploadTugas'])->name('freelancer.uploadTugas');
 

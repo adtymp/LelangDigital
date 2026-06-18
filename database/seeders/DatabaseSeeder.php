@@ -73,15 +73,15 @@ class DatabaseSeeder extends Seeder
 
         $data = [
             [
-                'aspek' => 'ketepatan',
+                'aspek' => 'Hasil Kerja',
                 'bobot' => 0.4,
             ],
             [
-                'aspek' => 'tepat waktu',
+                'aspek' => 'Ketepatan Waktu',
                 'bobot' => 0.35,
             ],
             [
-                'aspek' => 'kualitas',
+                'aspek' => 'Ketelitian Data',
                 'bobot' => 0.25,
             ]
         ];

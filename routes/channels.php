@@ -9,3 +9,7 @@ Broadcast::channel('chat.{id1}.{id2}', function ($user, $id1, $id2) {
 Broadcast::channel('user.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
+
+Broadcast::channel('admin', function ($user) {
+    return $user->hasRole('admin');
+});

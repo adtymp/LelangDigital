@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\UpdateBadge;
 use App\Models\Level;
 use App\Models\LogPoin;
 use App\Models\Pembayaran;
@@ -12,8 +13,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use setasign\Fpdi\Tcpdf\Fpdi;
 use ZipArchive;
 
 class PengambilanController extends Controller
@@ -21,13 +22,13 @@ class PengambilanController extends Controller
     public function detailProyek(Subsubproyek $subsub)
     {
         $user = Auth::user();
-        
+
         $subsub->load('subproyeks.proyeks');
 
         $totalHalaman = $subsub->total_halaman;
 
         $halamanDiambil = Pengambilan::where('subsubproyek_id', $subsub->id)
-            ->where('status', 'diambil')->sum('total_halaman');
+            ->whereIn('status', ['diambil', 'menunggu', 'selesai'])->sum('total_halaman');
 
         $sisaHalaman = $totalHalaman - $halamanDiambil;
 
@@ -77,6 +78,32 @@ class PengambilanController extends Controller
                 'badges'
             )
         );
+    }
+
+    public function downloadPdfSubsubproyek($id)
+    {
+        $filePdf = Subsubproyek::findOrFail($id);
+
+        if (!$filePdf->file_pdf || !Storage::disk('public')->exists($filePdf->file_pdf)) {
+            return back()->with('error', 'File PDF tidak ditemukan.');
+        }
+
+        $filePath = storage_path('app/public/' . $filePdf->file_pdf);
+
+        return response()->download($filePath);
+    }
+
+    public function downloadTemplateSubsubproyek($id)
+    {
+        $fileXls = Subsubproyek::findOrFail($id);
+
+        if (!$fileXls->file_xls || !Storage::disk('public')->exists($fileXls->file_xls)) {
+            return back()->with('error', 'File template tidak ditemukan.');
+        }
+
+        $filePath = storage_path('app/public/' . $fileXls->file_xls);
+
+        return response()->download($filePath);
     }
 
     public function downloadPdfTugas($id)
@@ -133,19 +160,26 @@ class PengambilanController extends Controller
         $waktuDiambil = \Carbon\Carbon::parse($pengambilan->created_at);
         $sekarang = now();
 
-        // Total durasi proyek dalam jam (minimal 1 jam)
-        $totalDurasiJam = max($tanggalMulai->diffInHours($tanggalSelesai), 1);
+        $totalDurasiHari = max(
+            $tanggalMulai->startOfDay()->diffInDays(
+                $tanggalSelesai->startOfDay()
+            ),
+            1
+        );
 
-        // Lama tugas ditahan user dalam jam
-        $jamDiambil = max($waktuDiambil->diffInHours($sekarang), 0);
+        $hariDiambil = max(
+            $waktuDiambil->startOfDay()->diffInDays(
+                $sekarang->startOfDay()
+            ),
+            0
+        );
 
-        // Jika belum 1 jam tapi sudah sempat diambil, anggap minimal 1 jam
-        if ($jamDiambil === 0 && $waktuDiambil->lt($sekarang)) {
-            $jamDiambil = 1;
+        // Jika belum 1 jam tapi sudah sempat diambil, anggap minimal 1 hari
+        if ($hariDiambil === 0 && $waktuDiambil->lt($sekarang)) {
+            $hariDiambil = 1;
         }
 
-        // Rasio waktu pemakaian tugas (0 - 1)
-        $faktorRasio = min($jamDiambil / $totalDurasiJam, 1);
+        $faktorRasio = $hariDiambil / $totalDurasiHari;
 
         // Penalti dasar: selalu kena meski baru ambil lalu batal
         $penaltiDasar = 1;
@@ -159,8 +193,8 @@ class PengambilanController extends Controller
             'penalti' => $penalti,
             'faktor_kualitas' => round($faktorKualitas, 2),
             'faktor_halaman' => $faktorHalaman,
-            'total_durasi_jam' => $totalDurasiJam,
-            'jam_diambil' => $jamDiambil,
+            'total_durasi_hari' => $totalDurasiHari,
+            'hari_diambil' => $hariDiambil,
             'faktor_rasio' => round($faktorRasio, 2),
         ];
     }
@@ -218,35 +252,47 @@ class PengambilanController extends Controller
             Storage::disk('public')->makeDirectory($folder);
         }
 
-        $pdf = new Fpdi();
-
-        $pageCount = $pdf->setSourceFile($source);
-
-        if ($sampai > $pageCount) {
-            throw new \Exception("Halaman melebihi jumlah halaman PDF ($pageCount)");
-        }
-
-        for ($i = $dari; $i <= $sampai; $i++) {
-
-            $template = $pdf->importPage($i);
-
-            $size = $pdf->getTemplateSize($template);
-
-            $pdf->AddPage(
-                $size['orientation'],
-                [$size['width'], $size['height']]
-            );
-
-            $pdf->useTemplate($template);
-        }
-
         $fileName = 'split_' . $dari . '_' . $sampai . '_' . time() . '.pdf';
-
         $savePath = storage_path('app/public/' . $folder . '/' . $fileName);
 
-        $pdf->Output($savePath, 'F');
+        // 1. Deteksi Sistem Operasi untuk menentukan Executable Ghostscript
+        // Windows menggunakan 'gswin64c' (console mode), Linux/macOS menggunakan 'gs'
+        $gsExecutable = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') ? 'gswin64c' : 'gs';
+
+        // 2. Susun perintah pemotongan halaman PDF secara aman menggunakan escapeshellarg
+        $command = "{$gsExecutable} -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dNOPAUSE -dQUIET -dBATCH -sPageList={$dari}-{$sampai} -sOutputFile=" . escapeshellarg($savePath) . " " . escapeshellarg($source);
+
+        // 3. Eksekusi perintah di sistem operasi
+        $output = [];
+        $returnCode = 0;
+
+        shell_exec($command);
+
+        // 4. Validasi apakah file hasil split berhasil dibuat
+        if (!file_exists($savePath) || filesize($savePath) === 0) {
+            throw new \Exception("Gagal memotong PDF. Pastikan Ghostscript sudah terinstal dan terdaftar di Environment Path.");
+        }
 
         return $folder . '/' . $fileName;
+    }
+
+    public function downloadZip(Request $request)
+    {
+        $fileName = basename($request->query('file', '')); // basename() mencegah path traversal
+    
+        if (empty($fileName)) {
+            abort(404);
+        }
+    
+        $zipPath = storage_path('app/temp/' . $fileName);
+    
+        if (!file_exists($zipPath)) {
+            abort(404);
+        }
+    
+        return response()
+            ->download($zipPath)
+            ->deleteFileAfterSend(true);
     }
 
     public function ambilTugas(Request $request, $subsub)
@@ -288,7 +334,7 @@ class PengambilanController extends Controller
 
             if ($bentrok) {
                 return back()
-                    ->withErrors(['dari_halaman' => 'Range halaman sudah diambil freelancer lain'])
+                    ->withErrors(['dari_halaman' => 'Range halaman sudah diambil'])
                     ->withInput();
             }
 
@@ -325,6 +371,8 @@ class PengambilanController extends Controller
 
             DB::commit();
 
+            UpdateBadge::dispatch($user->id, 'freelancer');
+
             // =========================
             // BUAT ZIP OTOMATIS
             // =========================
@@ -354,7 +402,6 @@ class PengambilanController extends Controller
                         basename($pdfFullPath)
                     );
                 }
-
                 // XLS template
                 if (file_exists($xlsFullPath)) {
                     $zip->addFile(
@@ -364,11 +411,12 @@ class PengambilanController extends Controller
                 }
 
                 $zip->close();
+
             } else {
                 throw new \Exception('Gagal membuat file ZIP');
             }
 
-            return response()->download($zipPath)->deleteFileAfterSend(true);
+            return response()->download($zipPath, $zipName)->deleteFileAfterSend(true);
         } catch (\Exception $e) {
 
             DB::rollBack();
@@ -393,6 +441,14 @@ class PengambilanController extends Controller
                 'upload' => Pengambilan::where('status', 'diambil')->where('user_id', $user->id)->count()
             ];
         }
+
+        $tugasDiambil = Pengambilan::where('user_id', Auth::id())
+            ->where('status', 'diambil')
+            ->count();
+
+        $tugasMenunggu = Pengambilan::where('user_id', Auth::id())
+            ->where('status', 'menunggu')
+            ->count();
 
         $tugases = Pengambilan::with('subsubproyeks.subproyeks.proyeks')
             ->where('user_id', Auth::id())
@@ -433,8 +489,8 @@ class PengambilanController extends Controller
                     'penalti_detail' => [
                         'faktor_kualitas' => $hasilPenalti['faktor_kualitas'],
                         'faktor_halaman' => $hasilPenalti['faktor_halaman'],
-                        'total_durasi_jam' => $hasilPenalti['total_durasi_jam'],
-                        'jam_diambil' => $hasilPenalti['jam_diambil'],
+                        'total_durasi_hari' => $hasilPenalti['total_durasi_hari'],
+                        'hari_diambil' => $hasilPenalti['hari_diambil'],
                         'faktor_rasio' => $hasilPenalti['faktor_rasio'],
                         'penalti' => $hasilPenalti['penalti'],
                     ],
@@ -444,7 +500,9 @@ class PengambilanController extends Controller
         return view('freelancer.uploadTugas', compact(
             'tugases',
             'menus',
-            'badges'
+            'badges',
+            'tugasDiambil',
+            'tugasMenunggu'
         ));
     }
 
@@ -507,14 +565,14 @@ class PengambilanController extends Controller
 
             DB::commit();
 
+            UpdateBadge::dispatch(Auth::id(), 'freelancer');
+
             return redirect()->back()->with('success', 'Tugas berhasil dibatalkan. Poin Anda berkurang ' . $penalti . ' poin.');
         } catch (\Exception $e) {
             DB::rollBack();
 
             return redirect()->back()->withErrors('Gagal membatalkan tugas');
         }
-
-        return back()->with('success', 'Tugas dibatalkan');
     }
 
     public function uploadTugas(Request $request, $id)
@@ -535,6 +593,16 @@ class PengambilanController extends Controller
             'xls_hasil' => $hasilPath,
             'status' => 'menunggu',
         ]);
+
+        $user = Auth::user();
+
+        UpdateBadge::dispatch($user->id, 'freelancer');
+
+        $admins = User::role('admin')->get();
+
+        foreach ($admins as $admin) {
+            UpdateBadge::dispatch($admin->id, 'admin');
+        }
 
         return redirect()->back()->with('success', 'Tugas Berhasil DiUpload');
     }

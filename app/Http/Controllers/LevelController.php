@@ -62,7 +62,7 @@ class LevelController extends Controller
         }
 
         $levels = Level::all();
-        
+
         return view('freelancer.sistem_level', compact(
             'user',
             'levels',
@@ -79,6 +79,33 @@ class LevelController extends Controller
             'delay_notifikasi' => 'required|numeric',
         ]);
 
+        $levels = Level::orderBy('nama_level')->get();
+
+        if ($levels->contains('nama_level', $request->nama_level)) {
+            return redirect()->back()
+                ->withErrors([
+                    'error' => 'Level sudah ada'
+                ]);
+        }
+
+        $maxLevel = $levels->max('nama_level') ?? 0;
+
+        if ($request->nama_level != $maxLevel + 1) {
+            return redirect()->back()
+                ->withErrors([
+                    'error' => 'Level harus berurutan. Level berikutnya adalah ' . ($maxLevel + 1)
+                ]);
+        }
+
+        $lastLevel = $levels->where('nama_level', $maxLevel)->first();
+
+        if ($lastLevel && $request->min_poin <= $lastLevel->min_poin) {
+            return redirect()->back()
+                ->withErrors([
+                    'error' => 'Minimum poin harus lebih besar dari level sebelumnya'
+                ]);
+        }
+
         $level = Level::create([
             'nama_level' => $request->nama_level,
             'slug' => Str::slug('level ' . $request->nama_level),
@@ -86,10 +113,7 @@ class LevelController extends Controller
             'delay_notifikasi' => $request->delay_notifikasi,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'data' => $level,
-        ]);
+        return redirect()->back()->with('success', 'Level berhasil ditambahkan');
     }
 
     public function updateLevel(Request $request, Level $level)
@@ -139,6 +163,15 @@ class LevelController extends Controller
                 'message' => 'Hapus level terakhir terlebih dahulu'
             ], 422);
         }
+
+        $previousLevel = Level::where('nama_level', '<', $level->nama_level)
+        ->orderByDesc('nama_level')
+        ->first();
+
+        User::where('level_id', $level->id)
+        ->update([
+            'level_id' => $previousLevel?->id
+        ]);
 
         $level->delete();
 

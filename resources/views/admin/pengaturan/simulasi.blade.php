@@ -441,7 +441,6 @@
                 durasi: 14,
                 hari: 1,
                 pendapatan: 100000,
-                rasio: 0.5,
 
                 skor: @json($poins->mapWithKeys(fn($p)=>[$p->slug=>8])),
                 bobot: @json($poins->pluck('bobot', 'slug')),

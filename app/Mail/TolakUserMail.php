@@ -10,7 +10,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class AktifUser extends Mailable
+class TolakUserMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -27,7 +27,7 @@ class AktifUser extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Pengaktifan Akun',
+            subject: 'Penerimaan Akun User',
         );
     }
 
@@ -37,7 +37,7 @@ class AktifUser extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'email.aktifUser',
+            markdown: 'emails.user_tolak',
             with: [
                 'user' => $this->user,
             ],

@@ -2,26 +2,43 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\AktifUser;
 use App\Mail\AktifUserMail;
-use App\Mail\NonaktifUser;
-use App\Mail\TerimaUser;
-use App\Mail\TolakUser;
+use App\Mail\NonaktifUserMail;
+use App\Mail\TerimaUserMail;
+use App\Mail\TolakUserMail;
 use App\Models\Level;
 use App\Models\LogPoin;
 use App\Models\Pembayaran;
 use App\Models\Pengambilan;
 use App\Models\Penilaian;
+use App\Models\Portofolio;
+use App\Models\Rekening;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
 
 class ManajemenFreelancerController extends Controller
 {
+    public function filePortofolio(User $user)
+    {
+        $portofolio = $user->portofolio;
+    
+        if (!$portofolio) {
+            abort(404);
+        }
+    
+        if (!Storage::disk('public')->exists($portofolio->file_path)) {
+            abort(404);
+        }
+    
+        return Storage::disk('public')->response($portofolio->file_path);
+    }
+
     public function halamanFreelancer(Request $request)
     {
         $role = Auth::user()->getRoleNames()->first();
@@ -79,7 +96,17 @@ class ManajemenFreelancerController extends Controller
             $query->where('status_akun', $request->status_akun);
         }
 
-        $freelancers = $query->latest()->paginate(10)->withQueryString();
+        $freelancers = $query->latest()
+            ->paginate(10)
+            ->through(function ($user) {
+
+                $user->portofolio_url = $user->portofolio
+                    ? route('portofolio.download', $user)
+                    : null;
+
+                return $user;
+            })
+            ->withQueryString();
 
         return view('admin.viewFreelancer', compact(
             'freelancers',
@@ -108,9 +135,9 @@ class ManajemenFreelancerController extends Controller
         ]);
 
         if ($statusVerifikasi === 'diterima') {
-            Mail::to($user->email)->queue(new TerimaUser($user));
+            Mail::to($user->email)->queue(new TerimaUserMail($user));
         } elseif ($statusVerifikasi === 'ditolak') {
-            Mail::to($user->email)->queue(new TolakUser($user));
+            Mail::to($user->email)->queue(new TolakUserMail($user));
         }
 
         return back()->with('success', "Status freelancer telah diubah {$statusVerifikasi}");
@@ -137,7 +164,7 @@ class ManajemenFreelancerController extends Controller
         if ($statusAkun === 'aktif') {
             Mail::to($user->email)->queue(new AktifUserMail($user));
         } elseif ($statusAkun === 'nonaktif') {
-            Mail::to($user->email)->queue(new NonaktifUser($user));
+            Mail::to($user->email)->queue(new NonaktifUserMail($user));
         }
 
         return back()->with('success', "Status akun freelancer berhasil diubah menjadi {$statusAkun}");
@@ -173,12 +200,14 @@ class ManajemenFreelancerController extends Controller
             })
             ->count();
 
+        $levels = Level::orderBy('nama_level')->get();
+
         $levelSekarang = $user->level;
 
         $levelSelanjutnya = Level::where('min_poin', '>', $user->poin_level)
             ->orderBy('min_poin')->first();
 
-        $poinSekarang = $levelSekarang->min_poin;
+        $poinSekarang = $levelSekarang?->min_poin;
 
         if ($levelSelanjutnya) {
             $poinSelanjutnya = $levelSelanjutnya->min_poin;
@@ -215,14 +244,33 @@ class ManajemenFreelancerController extends Controller
             ->where('status', 'sudah_dibayar')
             ->sum('total_pembayaran');
 
-        $logpoins = LogPoin::whereHas('pengambilan', function ($q) use ($user) {
-            $q->where('user_id', $user->id);
-        })->latest()->get();
+        $logpoins = LogPoin::with([
+            'pengambilan.subsubproyeks.subproyeks.proyeks'
+        ])
+            ->whereHas('pengambilan', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->latest()
+            ->get()
+            ->map(function ($log) {
+                $pengambilan = $log->pengambilan;
+                $subsubproyek = $log->pengambilan?->subsubproyeks;
+                $subproyek = $subsubproyek?->subproyeks;
+                $proyek = $subproyek?->proyeks;
+
+                $log->nama_proyek = $proyek?->nama_proyek;
+                $log->nama_sub_proyek = $subproyek?->nama_sub_proyek;
+                $log->dari_halaman = $pengambilan?->dari_halaman;
+                $log->sampai_halaman = $pengambilan?->sampai_halaman;
+
+                return $log;
+            });
 
         return view('freelancer.profil', compact(
             'user',
             'totalProyek',
             'totalProyekSelesai',
+            'levels',
             'levelSekarang',
             'levelSelanjutnya',
             'poinSelanjutnya',
@@ -286,5 +334,79 @@ class ManajemenFreelancerController extends Controller
 
 
         return back()->with('success', "Password berhasil diubah");
+    }
+
+    public function updateRekening(Request $request, User $user)
+    {
+        $request->validate(
+            [
+                'nama_bank' => ['required', 'string', 'max:100'],
+                'no_akun'   => ['required', 'string', 'min:6', 'max:30', 'regex:/^[0-9]+$/'],
+                'nama_akun' => ['required', 'string', 'max:100'],
+            ],
+            [
+                'nama_bank.required' => 'Nama bank wajib diisi.',
+                'no_akun.required'   => 'Nomor rekening wajib diisi.',
+                'no_akun.regex'      => 'Nomor rekening hanya boleh berisi angka.',
+                'no_akun.min'        => 'Nomor rekening terlalu pendek.',
+                'nama_akun.required' => 'Nama pemilik rekening wajib diisi.',
+            ]
+        );
+
+        Rekening::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'nama_bank' => $request->nama_bank,
+                'no_akun'   => $request->no_akun,
+                'nama_akun' => $request->nama_akun,
+            ]
+        );
+
+        return back()->with('success', 'Data rekening berhasil disimpan.');
+    }
+
+    public function updatePortofolio(Request $request, User $user)
+    {
+        $request->validate(
+            [
+                'type'      => ['required', 'in:file,link'],
+                'file_path' => ['required_if:type,file', 'nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+                'link_url'  => ['required_if:type,link', 'nullable', 'url', 'max:255'],
+            ],
+            [
+                'type.required'         => 'Tipe portofolio wajib dipilih.',
+                'file_path.required_if' => 'File portofolio wajib diunggah.',
+                'file_path.mimes'       => 'File harus berupa PDF, JPG, atau PNG.',
+                'file_path.max'         => 'Ukuran file maksimal 5 MB.',
+                'link_url.required_if'  => 'URL portofolio wajib diisi.',
+                'link_url.url'          => 'Format URL tidak valid.',
+            ]
+        );
+
+        $portofolio = $user->portofolio;
+
+        $data = [
+            'type'      => $request->type,
+            'file_path' => null,
+            'link_url'  => null,
+        ];
+
+        if ($request->type === 'file' && $request->hasFile('file_path')) {
+            // Hapus file lama dari storage jika ada
+            if ($portofolio && $portofolio->file_path) {
+                Storage::disk('public')->delete($portofolio->file_path);
+            }
+            $data['file_path'] = $request->file('file_path')->store('portofolio', 'public');
+        } else {
+            $data['link_url'] = $request->link_url;
+        }
+
+        if ($portofolio) {
+            $portofolio->update($data);
+        } else {
+            $user->portofolio()->create($data);
+        }
+
+        return back()->with('success', 'Portofolio berhasil diperbarui.');
     }
 }
