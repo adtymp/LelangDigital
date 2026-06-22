@@ -249,7 +249,7 @@
 
     // Fungsi menampilkan error lewat komponen x-toast yang mendengarkan event 'notify'
     function showErrorAlert(message) {
-        window.dispatchEvent(new CustomEvent('toast', {
+        window.dispatchEvent(new CustomEvent('notify', {
             detail: {
                 type: 'error',
                 title: 'Gagal Mengambil Halaman',
@@ -491,17 +491,14 @@
         const file = "{{ session('zip_file') }}";
         const url = "{{ route('freelance.download.zip') }}?file=" + encodeURIComponent(file);
 
-        // Tampilkan banner download yang bisa diklik user
-        const banner = document.createElement('div');
-        banner.innerHTML = `
-            <div style="position:fixed;bottom:20px;right:20px;z-index:9999;background:#16a34a;color:white;padding:16px 20px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.2)">
-                Tugas berhasil diambil! 
-                <a href="${url}" download style="color:white;font-weight:bold;text-decoration:underline;margin-left:8px;">
-                    Klik di sini untuk unduh ZIP
-                </a>
-            </div>`;
-        document.body.appendChild(banner);
-        setTimeout(() => banner.remove(), 15000);
+        // Buka unduhan ZIP di tab baru / trigger download secara terpisah
+        const link = document.createElement('a');
+        link.href = url;
+        link.target = '_blank';
+        link.download = file;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     });
 </script>
 @endif

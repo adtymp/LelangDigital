@@ -19,22 +19,7 @@ Kami ingin menginformasikan bahwa pembayaran untuk tugas Anda pada proyek **{{ $
 </x-mail::table>
 
 ## Bukti Transfer
-@if($pembayaran->bukti_transfer)
-@php
-$extension = pathinfo($pembayaran->bukti_transfer, PATHINFO_EXTENSION);
-$isImage = in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif']);
-@endphp
-
-@if($isImage)
-<img src="{{ rtrim(config('app.url'), '/') . '/storage/' . $pembayaran->bukti_transfer }}"
-     alt="Bukti Transfer"
-     style="max-width:100%; height:auto;">
-@else
-<x-mail::button :url="rtrim(config('app.url'), '/').'/storage/'.$pembayaran->bukti_transfer" color="success">
-Unduh Bukti Transfer (PDF)
-</x-mail::button>
-@endif
-@endif
+Silakan lihat lampiran email untuk melihat bukti transfer pembayaran.
 
 Klik di bawah ini untuk masuk ke dalam sistem:
 

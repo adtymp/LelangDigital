@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Models\Notifikasi;
 use App\Models\Penilaian;
 use App\Models\User;
 use Illuminate\Broadcasting\Channel;
@@ -25,6 +26,13 @@ class NilaiTugas implements ShouldBroadcastNow
         $this->penilaian = $penilaian;
         $this->user = $user;
         $this->namaSubProyek = $namaSubProyek;
+
+        Notifikasi::create([
+            'user_id' => $user->id,
+            'title' => 'Tugas Dinilai ⭐',
+            'message' => 'Tugas untuk sub proyek "' . $namaSubProyek . '" dinilai. Skor: ' . $penilaian->total_skor . ', Poin: +' . $penilaian->total_poin . '.',
+            'type' => 'nilai_tugas',
+        ]);
     }
 
     /**

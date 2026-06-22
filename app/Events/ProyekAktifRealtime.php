@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Models\Notifikasi;
 use App\Models\Proyek;
 use App\Models\User;
 use Illuminate\Broadcasting\Channel;
@@ -24,6 +25,14 @@ class ProyekAktifRealtime implements ShouldBroadcastNow
     {
         $this->proyek = $proyek;
         $this->user = $user;
+
+        // Simpan notifikasi ke database
+        \App\Models\Notifikasi::create([
+            'user_id' => $user->id,
+            'title' => 'Proyek Baru Aktif 🚀',
+            'message' => 'Proyek "' . $proyek->nama_proyek . '" sekarang tersedia di dashboard Anda.',
+            'type' => 'proyek_aktif',
+        ]);
     }
 
     /**

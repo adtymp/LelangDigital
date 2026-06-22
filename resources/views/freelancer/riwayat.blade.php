@@ -7,10 +7,10 @@
 
 <!-- Ringkasan Statistik -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-    <x-stat-card title="Total Proyek" :value="$totalProyek" color="yellow"></x-stat-card>
-    <x-stat-card title="Sudah Dibayar" :value="$sudahDibayar" color="blue"></x-stat-card>
-    <x-stat-card title="Belum Dibayar" :value="$belumDibayar" color="red"></x-stat-card>
-    <x-stat-card title="Total Pendapatan" :value="'Rp. ' . number_format($totalPendapatan, 0, ',', '.')" color="green"></x-stat-card>
+    <x-stat-card title="Total Proyek" :value="$totalProyek" color="yellow" brdr="yellow"></x-stat-card>
+    <x-stat-card title="Sudah Dibayar" :value="$sudahDibayar" color="blue" brdr="blue"></x-stat-card>
+    <x-stat-card title="Belum Dibayar" :value="$belumDibayar" color="red" brdr="red"></x-stat-card>
+    <x-stat-card title="Total Pendapatan" :value="'Rp. ' . number_format($totalPendapatan, 0, ',', '.')" color="green" brdr="green"></x-stat-card>
 </div>
 
 <!-- Konfigurasi Filter Bulan & Tahun untuk Komponen search-filter -->
@@ -87,7 +87,7 @@ $filterConfig = [
                                     </p>
                                 </div>
                                 <div class="shrink-0">
-                                    <x-status-alpine status="p.status"></x-status-alpine>
+                                    <x-status-alpine status="p.status" brdr=""></x-status-alpine>
                                 </div>
                             </div>
 
@@ -146,7 +146,7 @@ $filterConfig = [
                                     <td class="px-6 py-4 text-center font-medium text-slate-500" x-text="new Date(p.updated_at).toLocaleDateString('id-ID', {day: '2-digit', month: '2-digit', year: 'numeric'})"></td>
                                     <td class="px-6 py-4 font-bold text-emerald-600" x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(p.total_pembayaran)"></td>
                                     <td class="px-6 py-4 text-center">
-                                        <x-status-alpine status="p.status"></x-status-alpine>
+                                        <x-status-alpine status="p.status" brdr=""></x-status-alpine>
                                     </td>
                                     <td class="px-6 py-4 text-center">
                                         <x-secondary-button type="button" @click="openModal(p)">
@@ -178,7 +178,7 @@ $filterConfig = [
     </div>
 
     <!-- MODAL DETAIL RIWAYAT PEKERJAAN (Tunggal di Luar Loop) -->
-    <x-modals.detail-riwayat-pekerjaan></x-modals.detail-riwayat-pekerjaan>
+    <x-modals.detail-riwayat-pekerjaan brdr=""></x-modals.detail-riwayat-pekerjaan>
 
 </div>
 

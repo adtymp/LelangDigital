@@ -148,6 +148,7 @@
                                         </template>
 
                                         <input type="file"
+                                            :id="`file_pdf_${subIdx}_${ssIdx}`"
                                             :name="ss.temp_pdf ? '' : `sub_proyek[${subIdx}][sub_sub][${ssIdx}][file_pdf]`"
                                             accept="application/pdf"
                                             @change="handlePdf($event, subIdx, ssIdx)"
@@ -171,7 +172,15 @@
                                                             </svg>
                                                             <span>Mengunggah PDF...</span>
                                                         </div>
-                                                        <span class="text-brand-700 font-bold" x-text="ss.uploadProgress + '%'"></span>
+                                                        <!-- UBAH BAGIAN PERSENTASE INI DENGAN TOMBOL BATAL -->
+                                                        <div class="flex items-center gap-2">
+                                                            <span class="text-brand-700 font-bold" x-text="ss.uploadProgress + '%'"></span>
+                                                            <button type="button"
+                                                                @click="cancelUpload(subIdx, ssIdx)"
+                                                                class="text-gray-400 hover:text-gray-600 font-bold text-[10px] px-1.5 py-0.5 transition">
+                                                                X
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                     <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
                                                         <div class="bg-brand-500 h-2 rounded-full transition-all duration-300 ease-out"
@@ -325,7 +334,7 @@
                     this.isUploadingGlobal = false;
                     return;
                 }
-                
+
                 this.isUploadingGlobal = true;
                 let task = this.uploadQueue.shift();
 
@@ -420,7 +429,8 @@
                     isUploading: false,
                     uploadProgress: 0,
                     uploadError: null,
-                    temp_pdf: null
+                    temp_pdf: null,
+                    xhr: null
                 });
             },
 
@@ -458,6 +468,7 @@
                     formData.append('_token', '{{ csrf_token() }}');
 
                     let xhr = new XMLHttpRequest();
+                    ss.xhr = xhr;
                     xhr.open('POST', '{{ route("ajax.pdf.info") }}', true);
 
                     xhr.setRequestHeader('Accept', 'application/json');
@@ -470,9 +481,24 @@
                         }
                     };
 
+                    // Handler ketika upload dibatalkan
+                    xhr.onabort = () => {
+                        ss.isUploading = false;
+                        ss.uploadProgress = 0;
+                        ss.xhr = null;
+                        ss.uploadError = 'Upload dibatalkan oleh pengguna.';
+
+                        // Reset pilihan input file HTML
+                        let fileInput = document.getElementById(`file_pdf_${subIndex}_${ssIndex}`);
+                        if (fileInput) fileInput.value = '';
+
+                        doneCallback(); // Lanjutkan antrean berikutnya
+                    };
+
                     // Callback ketika selesai
                     xhr.onload = () => {
                         ss.isUploading = false;
+                        ss.xhr = null;
                         if (xhr.status >= 200 && xhr.status < 300) {
                             try {
                                 let data = JSON.parse(xhr.responseText);
@@ -483,38 +509,50 @@
                             } catch (err) {
                                 ss.uploadError = 'Gagal membaca respons server.';
                             }
-                        } else if (xhr.status === 413) {
-                            ss.uploadError = 'File terlalu besar untuk server. Hubungi administrator.';
-                        } else if (xhr.status === 422) {
-                            try {
-                                let errData = JSON.parse(xhr.responseText);
-                                ss.uploadError = errData.message || 'File tidak valid.';
-                            } catch {
-                                ss.uploadError = 'Validasi file gagal.';
-                            }
                         } else {
-                            ss.uploadError = `Upload gagal (status ${xhr.status}). Coba lagi.`;
+                            // Reset input file jika terjadi error dari server
+                            let fileInput = document.getElementById(`file_pdf_${subIndex}_${ssIndex}`);
+                            if (fileInput) fileInput.value = '';
+
+                            if (xhr.status === 413) {
+                                ss.uploadError = 'File terlalu besar untuk server. Hubungi administrator.';
+                            } else if (xhr.status === 422) {
+                                try {
+                                    let errData = JSON.parse(xhr.responseText);
+                                    ss.uploadError = errData.message || 'File tidak valid.';
+                                } catch {
+                                    ss.uploadError = 'Validasi file gagal.';
+                                }
+                            } else {
+                                ss.uploadError = `Upload gagal (status ${xhr.status}). Coba lagi.`;
+                            }
                         }
-                        
-                        doneCallback(); // Selesai, lanjutkan antrean berikutnya
+
+                        doneCallback(); // Lanjutkan antrean berikutnya
                     };
 
                     xhr.onerror = () => {
                         ss.isUploading = false;
-                        ss.uploadError = 'Koneksi terputus saat mengunggah. Periksa jaringan Anda.';
+                        ss.xhr = null;
+                        ss.uploadError = 'Koneksi terputus saat mengunggah. Periksa jaringan atau batasan proxy (Cloudflare).';
+
+                        let fileInput = document.getElementById(`file_pdf_${subIndex}_${ssIndex}`);
+                        if (fileInput) fileInput.value = '';
+
                         doneCallback(); // Lanjutkan antrean berikutnya
                     };
 
-                    xhr.ontimeout = () => {
-                        ss.isUploading = false;
-                        ss.uploadError = 'Upload timeout. File terlalu besar atau koneksi lambat.';
-                        doneCallback(); // Lanjutkan antrean berikutnya
-                    };
-
-                    xhr.timeout = 1800000; // 30 menit timeout untuk file besar
+                    // BARIS xhr.timeout DAN xhr.ontimeout SEKARANG SUDAH DIHAPUS
 
                     xhr.send(formData);
                 });
+            },
+
+            cancelUpload(subIndex, ssIndex) {
+                let ss = this.sub_proyek[subIndex].sub_sub[ssIndex];
+                if (ss.xhr) {
+                    ss.xhr.abort(); // Membatalkan request. Ini otomatis memicu event onabort di atas
+                }
             },
 
             hitungSubtotal(subIndex, ssIndex) {

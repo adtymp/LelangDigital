@@ -12,17 +12,35 @@
     html {
       scroll-behavior: smooth;
     }
+
     @keyframes float {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-15px) rotate(3deg); }
+
+      0%,
+      100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+
+      50% {
+        transform: translateY(-15px) rotate(3deg);
+      }
     }
+
     @keyframes float-delayed {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(15px) rotate(-3deg); }
+
+      0%,
+      100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+
+      50% {
+        transform: translateY(15px) rotate(-3deg);
+      }
     }
+
     .animate-float {
       animation: float 6s ease-in-out infinite;
     }
+
     .animate-float-delayed {
       animation: float-delayed 8s ease-in-out infinite;
     }
@@ -33,7 +51,7 @@
 
   <!-- Floating Navigation Bar -->
   <header class="fixed top-0 left-0 w-full z-50 transition-all duration-300 py-4"
-          :class="scrolled ? 'bg-white/85 backdrop-blur-lg shadow-md border-b border-gray-100/50 py-3' : 'bg-transparent'">
+    :class="scrolled ? 'bg-white/85 backdrop-blur-lg shadow-md border-b border-gray-100/50 py-3' : 'bg-transparent'">
     <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
       <!-- Logo + Brand -->
       <a href="#" class="flex items-center gap-3 group">
@@ -56,25 +74,24 @@
       <!-- Auth Action Button -->
       <div>
         @auth
-          @if(auth()->user()->hasRole('admin'))
-            <a href="{{ route('dashboard.admin') }}" 
-               class="inline-flex items-center gap-2 bg-linear-to-r from-brand-500 to-brand-700 hover:from-brand-600 hover:to-brand-800 text-white font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-brand-500/20 hover:shadow-brand-500/30 transition-all duration-300 hover:-translate-y-0.5">
-              <span>Dashboard Admin</span>
-              <i class="fas fa-arrow-right text-xs"></i>
-            </a>
-          @else
-            <a href="{{ route('dashboard.freelance') }}" 
-               class="inline-flex items-center gap-2 bg-linear-to-r from-brand-500 to-brand-700 hover:from-brand-600 hover:to-brand-800 text-white font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-brand-500/20 hover:shadow-brand-500/30 transition-all duration-300 hover:-translate-y-0.5">
-              <span>Dashboard Freelancer</span>
-              <i class="fas fa-arrow-right text-xs"></i>
-            </a>
-          @endif
+        @if(auth()->user()->hasRole('admin'))
+        <a href="{{ route('dashboard.admin') }}"
+          class="inline-flex items-center gap-2 bg-linear-to-r from-brand-500 to-brand-700 hover:from-brand-600 hover:to-brand-800 text-white font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-brand-500/20 hover:shadow-brand-500/30 transition-all duration-300 hover:-translate-y-0.5">
+          <span class="text-sm">Dashboard Admin</span>
+          <i class="fas fa-arrow-right text-xs"></i>
+        </a>
         @else
-          <a href="{{ route('login') }}" 
-             class="inline-flex items-center gap-2 bg-linear-to-r from-brand-500 to-brand-700 hover:from-brand-600 hover:to-brand-800 text-white font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-brand-500/20 hover:shadow-brand-500/30 transition-all duration-300 hover:-translate-y-0.5">
-            <span>Masuk / Daftar</span>
-            <i class="fas fa-sign-in-alt text-xs"></i>
-          </a>
+        <a href="{{ route('dashboard.freelance') }}"
+          class="inline-flex items-center gap-2 bg-linear-to-r from-brand-500 to-brand-700 hover:from-brand-600 hover:to-brand-800 text-white font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-brand-500/20 hover:shadow-brand-500/30 transition-all duration-300 hover:-translate-y-0.5">
+          <span class="text-sm">Dashboard Freelancer</span>
+          <i class="fas fa-arrow-right text-xs"></i>
+        </a>
+        @endif
+        @else
+        <x-anchor link="{{ route('login') }}">
+          <span class="text-sm">Masuk / Daftar</span>
+          <i class="fas fa-sign-in-alt text-xs ml-2"></i>
+        </x-anchor>
         @endauth
       </div>
     </div>
@@ -93,32 +110,32 @@
           <span class="flex h-2 w-2 rounded-full bg-brand-500 animate-pulse"></span>
           Portal Kolaborasi & Distribusi Proyek Lembaran
         </div>
-        
+
         <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-gray-900 leading-[1.1]">
           Kelola Proyek Dokumen Lebih Cepat di <br>
           <span class="bg-linear-to-r from-brand-500 to-brand-700 bg-clip-text text-transparent">Pranala GigPortal</span>
         </h1>
-        
+
         <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
           Temukan kemudahan dalam pemrosesan data, digitalisasi dokumen, dan entri data lembar per lembar secara aman, cepat, dan transparan.
         </p>
 
         <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
           @auth
-            <a href="{{ auth()->user()->hasRole('admin') ? route('dashboard.admin') : route('dashboard.freelance') }}" 
-               class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-linear-to-r from-brand-500 to-brand-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 transition-all duration-300 hover:-translate-y-0.5">
-              <span>Buka Dashboard</span>
-              <i class="fas fa-chevron-right text-xs"></i>
-            </a>
+          <a href="{{ auth()->user()->hasRole('admin') ? route('dashboard.admin') : route('dashboard.freelance') }}"
+            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-linear-to-r from-brand-500 to-brand-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 transition-all duration-300 hover:-translate-y-0.5">
+            <span>Buka Dashboard</span>
+            <i class="fas fa-chevron-right text-xs"></i>
+          </a>
           @else
-            <a href="{{ route('login') }}" 
-               class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-linear-to-r from-brand-500 to-brand-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 transition-all duration-300 hover:-translate-y-0.5">
-              <span>Mulai Bekerja</span>
-              <i class="fas fa-chevron-right text-xs"></i>
-            </a>
+          <a href="{{ route('login') }}"
+            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-linear-to-r from-brand-500 to-brand-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 transition-all duration-300 hover:-translate-y-0.5">
+            <span>Mulai Bekerja</span>
+            <i class="fas fa-chevron-right text-xs"></i>
+          </a>
           @endauth
-          <a href="#alur" 
-             class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-700 font-bold px-8 py-4 rounded-xl shadow-md border border-gray-200 transition-all duration-300 hover:-translate-y-0.5">
+          <a href="#alur"
+            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-700 font-bold px-8 py-4 rounded-xl shadow-md border border-gray-200 transition-all duration-300 hover:-translate-y-0.5">
             <span>Pelajari Alur Kerja</span>
             <i class="fas fa-play text-xs text-brand-500"></i>
           </a>
@@ -183,7 +200,7 @@
   <!-- Interactive System Workflow (Alur Sistem) -->
   <section id="alur" class="py-24 bg-white relative">
     <div class="max-w-7xl mx-auto px-6">
-      
+
       <!-- Section Header -->
       <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
         <h2 class="text-xs uppercase tracking-widest text-brand-600 font-bold">Langkah Kerja</h2>
@@ -259,22 +276,22 @@
                 }
               }, 7000);
             }
-          }" 
-          class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-stretch">
-        
+          }"
+        class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-stretch">
+
         <!-- Left: Interactive Timeline Selectors -->
         <div class="lg:col-span-5 flex flex-col justify-between space-y-4">
           <div class="space-y-3">
             <template x-for="step in steps" :key="step.id">
               <button @click="activeStep = step.id; autoplay = false"
-                      class="w-full text-left p-4 rounded-2xl transition-all duration-300 flex items-center gap-4 border"
-                      :class="activeStep === step.id 
+                class="w-full text-left p-4 rounded-2xl transition-all duration-300 flex items-center gap-4 border"
+                :class="activeStep === step.id 
                               ? 'bg-linear-to-r from-brand-500 to-brand-700 text-white shadow-xl shadow-brand-500/20 border-transparent scale-102 -translate-x-1' 
                               : 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-800 border-gray-100'">
-                
+
                 <!-- Step Number Bubble -->
                 <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm transition-colors duration-300"
-                     :class="activeStep === step.id ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-700'">
+                  :class="activeStep === step.id ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-700'">
                   <span x-text="step.id"></span>
                 </div>
 
@@ -315,8 +332,8 @@
               <!-- Badge Role & Step Number -->
               <div class="flex items-center justify-between">
                 <span class="px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-white shadow-sm border border-gray-200 text-brand-600"
-                      x-text="`Modul Sistem: ${steps[activeStep-1].routeInfo}`"></span>
-                
+                  x-text="`Modul Sistem: ${steps[activeStep-1].routeInfo}`"></span>
+
                 <span class="text-sm font-bold text-gray-400" x-text="`Langkah ${activeStep} dari 6`"></span>
               </div>
 
@@ -341,19 +358,19 @@
               <div class="flex gap-2">
                 <template x-for="n in 6">
                   <span class="h-2 rounded-full transition-all duration-300"
-                        :class="n === activeStep ? 'w-8 bg-brand-500' : 'w-2 bg-gray-300'"
-                        @click="activeStep = n; autoplay = false"
-                        class="cursor-pointer"></span>
+                    :class="n === activeStep ? 'w-8 bg-brand-500' : 'w-2 bg-gray-300'"
+                    @click="activeStep = n; autoplay = false"
+                    class="cursor-pointer"></span>
                 </template>
               </div>
 
               <div class="flex gap-2">
                 <button @click="activeStep = activeStep === 1 ? 6 : activeStep - 1; autoplay = false"
-                        class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition shadow-sm">
+                  class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition shadow-sm">
                   <i class="fas fa-arrow-left text-xs"></i>
                 </button>
                 <button @click="activeStep = activeStep === 6 ? 1 : activeStep + 1; autoplay = false"
-                        class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition shadow-sm">
+                  class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition shadow-sm">
                   <i class="fas fa-arrow-right text-xs"></i>
                 </button>
               </div>
@@ -368,7 +385,7 @@
   <!-- Key Features Section (Fitur Unggulan) -->
   <section id="fitur" class="py-24 bg-gray-50 border-y border-gray-200/50">
     <div class="max-w-7xl mx-auto px-6">
-      
+
       <!-- Section Header -->
       <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
         <h2 class="text-xs uppercase tracking-widest text-brand-600 font-bold">Fitur Utama</h2>
@@ -412,7 +429,7 @@
   <!-- User Roles Comparison Section (Peran Pengguna) -->
   <section id="peran" class="py-24 bg-white">
     <div class="max-w-7xl mx-auto px-6">
-      
+
       <!-- Section Header -->
       <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
         <h2 class="text-xs uppercase tracking-widest text-brand-600 font-bold">Peran Aktor</h2>
@@ -445,15 +462,15 @@
               </li>
             </ul>
           </div>
-          
+
           <div class="pt-6">
             @auth
-              @if(auth()->user()->hasRole('admin'))
-                <a href="{{ route('dashboard.admin') }}" class="inline-flex items-center gap-2 font-bold text-brand-600 hover:text-brand-700 text-sm">
-                  <span>Masuk Dasbor Admin</span>
-                  <i class="fas fa-arrow-right"></i>
-                </a>
-              @endif
+            @if(auth()->user()->hasRole('admin'))
+            <a href="{{ route('dashboard.admin') }}" class="inline-flex items-center gap-2 font-bold text-brand-600 hover:text-brand-700 text-sm">
+              <span>Masuk Dasbor Admin</span>
+              <i class="fas fa-arrow-right"></i>
+            </a>
+            @endif
             @endauth
           </div>
         </div>
@@ -481,15 +498,15 @@
               </li>
             </ul>
           </div>
-          
+
           <div class="pt-6">
             @auth
-              @if(auth()->user()->hasRole('freelancer'))
-                <a href="{{ route('dashboard.freelance') }}" class="inline-flex items-center gap-2 font-bold text-brand-300 hover:text-brand-200 text-sm">
-                  <span>Masuk Dasbor Freelancer</span>
-                  <i class="fas fa-arrow-right"></i>
-                </a>
-              @endif
+            @if(auth()->user()->hasRole('freelancer'))
+            <a href="{{ route('dashboard.freelance') }}" class="inline-flex items-center gap-2 font-bold text-brand-300 hover:text-brand-200 text-sm">
+              <span>Masuk Dasbor Freelancer</span>
+              <i class="fas fa-arrow-right"></i>
+            </a>
+            @endif
             @endauth
           </div>
         </div>
@@ -507,22 +524,22 @@
       <p class="text-brand-100 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
         Gabung sekarang juga bersama ekosistem portal tugas PT. Pranala Digital Transmaritim. Rasakan kemudahan manajemen pemrosesan dokumen yang optimal dan transparan.
       </p>
-      
+
       <div class="flex flex-wrap items-center justify-center gap-4">
         @auth
-          <a href="{{ auth()->user()->hasRole('admin') ? route('dashboard.admin') : route('dashboard.freelance') }}" 
-             class="bg-white text-brand-700 hover:bg-brand-50 font-bold px-8 py-4 rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5">
-            Buka Dasbor
-          </a>
+        <a href="{{ auth()->user()->hasRole('admin') ? route('dashboard.admin') : route('dashboard.freelance') }}"
+          class="bg-white text-brand-700 hover:bg-brand-50 font-bold px-8 py-4 rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5">
+          Buka Dasbor
+        </a>
         @else
-          <a href="{{ route('login') }}" 
-             class="bg-white text-brand-700 hover:bg-brand-50 font-bold px-8 py-4 rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5">
-            Daftar Sekarang
-          </a>
-          <a href="#alur" 
-             class="bg-transparent border border-white/40 hover:bg-white/10 hover:border-white text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300">
-            Pelajari Selengkapnya
-          </a>
+        <a href="{{ route('login') }}"
+          class="bg-white text-brand-700 hover:bg-brand-50 font-bold px-8 py-4 rounded-xl shadow-lg transition-all duration-300 hover:-translate-y-0.5">
+          Daftar Sekarang
+        </a>
+        <a href="#alur"
+          class="bg-transparent border border-white/40 hover:bg-white/10 hover:border-white text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300">
+          Pelajari Selengkapnya
+        </a>
         @endauth
       </div>
     </div>
@@ -531,7 +548,7 @@
   <!-- Footer -->
   <footer class="bg-gray-900 text-gray-400 py-12 border-t border-gray-800">
     <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
-      
+
       <!-- Brand Left -->
       <div class="flex items-center gap-3">
         <img src="{{ asset('image/logo-pranala.png') }}" alt="Logo" class="w-8 h-8 object-contain bg-white p-1 rounded-lg">

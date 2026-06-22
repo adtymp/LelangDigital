@@ -6,6 +6,7 @@ use App\Http\Controllers\BadgeController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\LevelController;
 use App\Http\Controllers\ManajemenFreelancerController;
+use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\PengambilanController;
 use App\Http\Controllers\PenilaianController;
@@ -61,6 +62,10 @@ Route::get('/auth/google/callback', [GoogleController::class, 'callback']);
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/api/badges', [BadgeController::class, 'index'])->name('api.badges');
+
+    Route::get('/api/notifications', [NotifikasiController::class, 'index'])->name('notifications.index');
+    
+    Route::post('/api/notifications/read', [NotifikasiController::class, 'markRead'])->name('notifications.read');
 
     Route::get('/lengkapi-google', [GoogleController::class, 'formLengkapi'])->name('google.lengkapi');
 

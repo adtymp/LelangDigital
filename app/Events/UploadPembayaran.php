@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Models\Notifikasi;
 use App\Models\Pembayaran;
 use App\Models\User;
 use Illuminate\Broadcasting\Channel;
@@ -25,6 +26,13 @@ class UploadPembayaran implements ShouldBroadcastNow
         $this->pembayaran = $pembayaran;
         $this->user = $user;
         $this->namaProyek = $namaProyek;
+
+        Notifikasi::create([
+            'user_id' => $user->id,
+            'title' => 'Pembayaran Dikirim 💰',
+            'message' => 'Pembayaran Rp ' . number_format($pembayaran->total_pembayaran, 0, ',', '.') . ' untuk proyek "' . $namaProyek . '" telah diunggah oleh admin.',
+            'type' => 'pembayaran',
+        ]);
     }
 
     /**

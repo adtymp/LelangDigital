@@ -7,9 +7,12 @@ use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class UploadPembayaranMail extends Mailable
 {
@@ -56,7 +59,32 @@ class UploadPembayaranMail extends Mailable
      * @return array<int, \Illuminate\Mail\Mailables\Attachment>
      */
     public function attachments(): array
-    {
+{
+    Log::info('ATTACHMENT PATH: ' . $this->pembayaran->bukti_transfer);
+    Log::info(
+        'Exists: ' .
+        (Storage::disk('public')->exists($this->pembayaran->bukti_transfer)
+            ? 'YES'
+            : 'NO')
+    );
+    
+    if (
+        !$this->pembayaran->bukti_transfer ||
+        !Storage::disk('public')->exists($this->pembayaran->bukti_transfer)
+    ) {
         return [];
     }
+
+    $extension = pathinfo(
+        $this->pembayaran->bukti_transfer,
+        PATHINFO_EXTENSION
+    );
+
+    return [
+        Attachment::fromStorageDisk(
+            'public',
+            $this->pembayaran->bukti_transfer
+        )->as('Bukti-Transfer.' . $extension),
+    ];
+}
 }

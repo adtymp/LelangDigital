@@ -10,15 +10,18 @@
     <x-stat-card
         title="Belum Dibayar"
         :value="$belumDibayar"
-        color="red" />
+        color="red"
+        brdr="red"/>
     <x-stat-card
         title="Sudah Dibayar"
         :value="$sudahDibayar"
-        color="green" />
+        color="green"
+        brdr="green"/>
     <x-stat-card
         title="Total Pembayaran"
         :value="'Rp. ' . number_format($pengupahan, 0, ',', '.')"
-        color="blue">
+        color="blue"
+        brdr="blue">
     </x-stat-card>
 </div>
 

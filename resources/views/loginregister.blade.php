@@ -88,7 +88,7 @@
                 <div class="flex flex-col items-center text-center mb-6 space-y-2 md:hidden">
                     <img src="{{ asset('image/logo-pranala.png') }}" alt="Logo" class="w-12 h-12 object-contain">
                     <div>
-                        <h2 class="text-2xl font-bold bg-linear-to-r from-brand-500 to-brand-700 bg-clip-text text-transparent">Sistem Lelang Digital</h2>
+                        <h2 class="text-2xl font-bold bg-linear-to-r from-brand-500 to-brand-700 bg-clip-text text-transparent">Pranala GigPortal</h2>
                         <p class="text-xs text-gray-500 font-medium">PT. Digital Pranala Transmaritim</p>
                     </div>
                 </div>

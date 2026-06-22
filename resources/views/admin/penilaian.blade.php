@@ -40,16 +40,18 @@
         <x-stat-card
             title="Total Proyek"
             :value="count($jumlahPerProyek)"
-            color="blue">
+            color="blue"
+            brdr="blue">
         </x-stat-card>
 
         <x-stat-card
             title="Menunggu Penilaian"
             :value="collect($jumlahPerProyek)->sum('total')"
-            color="amber">
+            color="yellow"
+            brdr="yellow">
         </x-stat-card>
 
-        <div class="relative overflow-hidden bg-linear-to-r from-brand-500 to-brand-700 rounded-3xl p-6 border-2 border-brand-500 hover:border-2 transition hover:-translate-y-1 hover:shadow-2xl">
+        <div class="relative overflow-hidden bg-linear-to-r from-brand-500 to-brand-700 rounded-3xl p-6 border-l-8 border-2 border-brand-400 hover:border-l-8 transition hover:-translate-y-1 hover:shadow-2xl">
             <p class="text-white font-medium text-sm mb-2">
                 Status
             </p>

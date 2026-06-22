@@ -100,9 +100,6 @@ class GoogleController extends Controller
         }
     }
 
-    /**
-     * Form lengkapi data
-     */
     public function formLengkapi()
     {
         $user = Auth::user();
@@ -122,9 +119,6 @@ class GoogleController extends Controller
         ));
     }
 
-    /**
-     * Simpan data tambahan
-     */
     public function simpanLengkapi(Request $request)
     {
         $request->validate([
@@ -219,9 +213,6 @@ class GoogleController extends Controller
         }
     }
 
-    /**
-     * Redirect berdasarkan role
-     */
     private function redirectByRole($user)
     {
         if ($user->hasRole('admin')) {

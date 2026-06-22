@@ -315,6 +315,8 @@ class PengambilanController extends Controller
             $sampai_halaman = $request->sampai_halaman;
 
             if ($sampai_halaman > $subsub->total_halaman) {
+                DB::rollBack();
+
                 return back()
                     ->withErrors(['sampai_halaman' => 'Halaman melebihi total PDF'])
                     ->withInput();
@@ -333,8 +335,11 @@ class PengambilanController extends Controller
                 })->exists();
 
             if ($bentrok) {
+                DB::rollBack();
+
                 return back()
-                    ->withErrors(['dari_halaman' => 'Range halaman sudah diambil'])
+                    ->withErrors(['dari_halaman' => 'Range halaman sudah diambil oleh freelancer lain'])
+                    ->with('error', 'Range halaman sudah diambil oleh freelancer lain. Silakan pilih halaman yang masih tersedia.')
                     ->withInput();
             }
 
@@ -416,7 +421,11 @@ class PengambilanController extends Controller
                 throw new \Exception('Gagal membuat file ZIP');
             }
 
-            return response()->download($zipPath, $zipName)->deleteFileAfterSend(true);
+            return redirect()
+                ->back()
+                ->with('success', 'Tugas berhasil diambil! Unduhan ZIP akan dimulai otomatis.')
+                ->with('zip_ready', true)
+                ->with('zip_file', $zipName);
         } catch (\Exception $e) {
 
             DB::rollBack();

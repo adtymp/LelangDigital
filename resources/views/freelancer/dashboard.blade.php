@@ -39,6 +39,7 @@ $keunggulanText = $delay == 0
         title="Proyek Aktif"
         :value="$proyekAktif"
         color="blue"
+        brdr="blue"
         shade="600">
         <x-slot:icon>
             <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 640 640">
@@ -51,6 +52,7 @@ $keunggulanText = $delay == 0
         title="Tugas Selesai"
         :value="$proyekSelesai"
         color="yellow"
+        brdr="yellow"
         shade="600">
         <x-slot:icon>
             <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 640 640">
@@ -63,6 +65,7 @@ $keunggulanText = $delay == 0
         title="Total Pendapatan"
         :value="'Rp. '. number_format($pendapatan, 0, ',', '.')"
         shade="600"
+        brdr="green"
         color="green">
         <x-slot:icon>
             <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 640 640">
