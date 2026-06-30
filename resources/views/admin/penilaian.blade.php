@@ -367,7 +367,7 @@
                                         class="w-full rounded-2xl border px-4 py-3 focus:ring-2 focus:ring-brand-500 outline-none transition" />
 
                                     <textarea
-                                        x-show="skor['{{ $poin->slug }}'] < 8"
+                                        x-show="skor['{{ $poin->slug }}'] < 10"
                                         x-model="notes['{{ $poin->slug }}']"
                                         name="catatan[{{ $poin->slug }}]"
                                         placeholder="Berikan catatan evaluasi..."
@@ -543,7 +543,7 @@
 
                 for (let key in this.skor) {
 
-                    if (this.skor[key] < 8 && !this.notes[key]) {
+                    if (this.skor[key] < 10 && !this.notes[key]) {
                         return true
                     }
                 }

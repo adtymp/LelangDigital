@@ -7,8 +7,6 @@
 
 {{-- Hero Profile --}}
 <div class="relative overflow-visible rounded-3xl bg-linear-to-r from-brand-500 via-brand-700 to-brand-500 p-6 sm:p-8 text-white shadow-lg mb-8">
-    <div class="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-white/10 blur-2xl"></div>
-    <div class="absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-white/10 blur-2xl"></div>
 
     <div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
         <div class="flex items-center gap-5">
@@ -68,11 +66,39 @@
                     x-transition:leave-end="opacity-0 scale-95"
                     class="absolute right-0 top-full mt-2 w-48 bg-white text-gray-700 rounded-xl shadow-xl overflow-hidden z-50">
 
-                    <p class="block px-4 py-2 border-b text-center text-brand-500 font-medium">Update Profil</p>
-                    <button @click="modal=true; pilihOpsi='telepon';" type="button" class="block px-4 py-2 hover:bg-blue-50 w-full text-start">📱 Telepon</button>
-                    <button @click="modal=true; pilihOpsi='password';" type="button" class="block px-4 py-2 hover:bg-blue-50 w-full text-start">🔒 Password</button>
-                    <button @click="modal=true; pilihOpsi='rekening';" type="button" class="block px-4 py-2 hover:bg-blue-50 w-full text-start">🏦 Rekening</button>
-                    <button @click="modal=true; pilihOpsi='portofolio';" type="button" class="block px-4 py-2 hover:bg-blue-50 w-full text-start border-t">💼 Portofolio</button>
+                    <p class="block px-4 py-2 border-b text-center text-white bg-brand-500 font-medium">Update Profil</p>
+                    <button @click="modal=true; pilihOpsi='telepon';" type="button" class="block px-4 py-2 hover:bg-brand-100 w-full text-start">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" viewBox="0 0 640 640"><!--!Font Awesome Free v7.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+                                <path fill="currentColor" d="M144 128C144 92.7 172.7 64 208 64L432 64C467.3 64 496 92.7 496 128L496 512C496 547.3 467.3 576 432 576L208 576C172.7 576 144 547.3 144 512L144 128zM208 128L208 432L432 432L432 128L208 128zM320 536C337.7 536 352 521.7 352 504C352 486.3 337.7 472 320 472C302.3 472 288 486.3 288 504C288 521.7 302.3 536 320 536z" />
+                            </svg>
+                            Telepon
+                        </div>
+                    </button>
+                    <button @click="modal=true; pilihOpsi='password';" type="button" class="block px-4 py-2 hover:bg-brand-100 w-full text-start">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" viewBox="0 0 640 640"><!--!Font Awesome Free v7.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+                                <path fill="currentColor" d="M400 416C497.2 416 576 337.2 576 240C576 142.8 497.2 64 400 64C302.8 64 224 142.8 224 240C224 258.7 226.9 276.8 232.3 293.7L71 455C66.5 459.5 64 465.6 64 472L64 552C64 565.3 74.7 576 88 576L168 576C181.3 576 192 565.3 192 552L192 512L232 512C245.3 512 256 501.3 256 488L256 448L296 448C302.4 448 308.5 445.5 313 441L346.3 407.7C363.2 413.1 381.3 416 400 416zM440 160C462.1 160 480 177.9 480 200C480 222.1 462.1 240 440 240C417.9 240 400 222.1 400 200C400 177.9 417.9 160 440 160z" />
+                            </svg>
+                            Password
+                        </div>
+                    </button>
+                    <button @click="modal=true; pilihOpsi='rekening';" type="button" class="block px-4 py-2 hover:bg-brand-100 w-full text-start">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" viewBox="0 0 640 640"><!--!Font Awesome Free v7.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+                                <path fill="currentColor" d="M335.9 84.2C326.1 78.6 314 78.6 304.1 84.2L80.1 212.2C67.5 219.4 61.3 234.2 65 248.2C68.7 262.2 81.5 272 96 272L128 272L128 480L128 480L76.8 518.4C68.7 524.4 64 533.9 64 544C64 561.7 78.3 576 96 576L544 576C561.7 576 576 561.7 576 544C576 533.9 571.3 524.4 563.2 518.4L512 480L512 272L544 272C558.5 272 571.2 262.2 574.9 248.2C578.6 234.2 572.4 219.4 559.8 212.2L335.8 84.2zM464 272L464 480L400 480L400 272L464 272zM352 272L352 480L288 480L288 272L352 272zM240 272L240 480L176 480L176 272L240 272zM320 160C337.7 160 352 174.3 352 192C352 209.7 337.7 224 320 224C302.3 224 288 209.7 288 192C288 174.3 302.3 160 320 160z" />
+                            </svg>
+                            Rekening
+                        </div>
+                    </button>
+                    <button @click="modal=true; pilihOpsi='portofolio';" type="button" class="block px-4 py-2 hover:bg-brand-100 w-full text-start">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" viewBox="0 0 640 640"><!--!Font Awesome Free v7.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+                                <path fill="currentColor" d="M192 64C156.7 64 128 92.7 128 128L128 512C128 547.3 156.7 576 192 576L448 576C483.3 576 512 547.3 512 512L512 128C512 92.7 483.3 64 448 64L192 64zM288 416L352 416C396.2 416 432 451.8 432 496C432 504.8 424.8 512 416 512L224 512C215.2 512 208 504.8 208 496C208 451.8 243.8 416 288 416zM264 320C264 289.1 289.1 264 320 264C350.9 264 376 289.1 376 320C376 350.9 350.9 376 320 376C289.1 376 264 350.9 264 320zM280 128L360 128C373.3 128 384 138.7 384 152C384 165.3 373.3 176 360 176L280 176C266.7 176 256 165.3 256 152C256 138.7 266.7 128 280 128z" />
+                            </svg>
+                            Portofolio
+                        </div>
+                    </button>
 
                     <!-- MODAL -->
                     <div
@@ -104,22 +130,42 @@
                                 <button type="button" @click="pilihOpsi='telepon'"
                                     :class="pilihOpsi === 'telepon' ? 'bg-white text-brand-500 border-b-2 border-brand-500' : 'text-gray-500 hover:text-brand-500'"
                                     class="flex-1 py-3 text-sm font-medium whitespace-nowrap px-3">
-                                    📱 Telepon
+                                    <div class="flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" viewBox="0 0 640 640"><!--!Font Awesome Free v7.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+                                            <path fill="currentColor" d="M144 128C144 92.7 172.7 64 208 64L432 64C467.3 64 496 92.7 496 128L496 512C496 547.3 467.3 576 432 576L208 576C172.7 576 144 547.3 144 512L144 128zM208 128L208 432L432 432L432 128L208 128zM320 536C337.7 536 352 521.7 352 504C352 486.3 337.7 472 320 472C302.3 472 288 486.3 288 504C288 521.7 302.3 536 320 536z" />
+                                        </svg>
+                                        Telepon
+                                    </div>
                                 </button>
                                 <button type="button" @click="pilihOpsi='password'"
                                     :class="pilihOpsi === 'password' ? 'bg-white text-brand-500 border-b-2 border-brand-500' : 'text-gray-500 hover:text-brand-500'"
                                     class="flex-1 py-3 text-sm font-medium whitespace-nowrap px-3">
-                                    🔒 Password
+                                    <div class="flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" viewBox="0 0 640 640"><!--!Font Awesome Free v7.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+                                            <path fill="currentColor" d="M400 416C497.2 416 576 337.2 576 240C576 142.8 497.2 64 400 64C302.8 64 224 142.8 224 240C224 258.7 226.9 276.8 232.3 293.7L71 455C66.5 459.5 64 465.6 64 472L64 552C64 565.3 74.7 576 88 576L168 576C181.3 576 192 565.3 192 552L192 512L232 512C245.3 512 256 501.3 256 488L256 448L296 448C302.4 448 308.5 445.5 313 441L346.3 407.7C363.2 413.1 381.3 416 400 416zM440 160C462.1 160 480 177.9 480 200C480 222.1 462.1 240 440 240C417.9 240 400 222.1 400 200C400 177.9 417.9 160 440 160z" />
+                                        </svg>
+                                        Password
+                                    </div>
                                 </button>
                                 <button type="button" @click="pilihOpsi='rekening'"
                                     :class="pilihOpsi === 'rekening' ? 'bg-white text-brand-500 border-b-2 border-brand-500' : 'text-gray-500 hover:text-brand-500'"
                                     class="flex-1 py-3 text-sm font-medium whitespace-nowrap px-3">
-                                    🏦 Rekening
+                                    <div class="flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" viewBox="0 0 640 640"><!--!Font Awesome Free v7.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+                                            <path fill="currentColor" d="M335.9 84.2C326.1 78.6 314 78.6 304.1 84.2L80.1 212.2C67.5 219.4 61.3 234.2 65 248.2C68.7 262.2 81.5 272 96 272L128 272L128 480L128 480L76.8 518.4C68.7 524.4 64 533.9 64 544C64 561.7 78.3 576 96 576L544 576C561.7 576 576 561.7 576 544C576 533.9 571.3 524.4 563.2 518.4L512 480L512 272L544 272C558.5 272 571.2 262.2 574.9 248.2C578.6 234.2 572.4 219.4 559.8 212.2L335.8 84.2zM464 272L464 480L400 480L400 272L464 272zM352 272L352 480L288 480L288 272L352 272zM240 272L240 480L176 480L176 272L240 272zM320 160C337.7 160 352 174.3 352 192C352 209.7 337.7 224 320 224C302.3 224 288 209.7 288 192C288 174.3 302.3 160 320 160z" />
+                                        </svg>
+                                        Rekening
+                                    </div>
                                 </button>
                                 <button type="button" @click="pilihOpsi='portofolio'"
                                     :class="pilihOpsi === 'portofolio' ? 'bg-white text-brand-500 border-b-2 border-brand-500' : 'text-gray-500 hover:text-brand-500'"
                                     class="flex-1 py-3 text-sm font-medium whitespace-nowrap px-3">
-                                    💼 Portofolio
+                                    <div class="flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" viewBox="0 0 640 640"><!--!Font Awesome Free v7.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+                                            <path fill="currentColor" d="M192 64C156.7 64 128 92.7 128 128L128 512C128 547.3 156.7 576 192 576L448 576C483.3 576 512 547.3 512 512L512 128C512 92.7 483.3 64 448 64L192 64zM288 416L352 416C396.2 416 432 451.8 432 496C432 504.8 424.8 512 416 512L224 512C215.2 512 208 504.8 208 496C208 451.8 243.8 416 288 416zM264 320C264 289.1 289.1 264 320 264C350.9 264 376 289.1 376 320C376 350.9 350.9 376 320 376C289.1 376 264 350.9 264 320zM280 128L360 128C373.3 128 384 138.7 384 152C384 165.3 373.3 176 360 176L280 176C266.7 176 256 165.3 256 152C256 138.7 266.7 128 280 128z" />
+                                        </svg>
+                                        Portofolio
+                                    </div>
                                 </button>
                             </div>
 
@@ -488,9 +534,31 @@
 
         {{-- Log Poin --}}
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="mb-6">
-                <h2 class="text-lg font-semibold text-slate-800">Log Poin</h2>
-                <p class="text-sm text-slate-500 mt-1">Riwayat perubahan poin berdasarkan aktivitas Anda.</p>
+            <div x-data="{ info : false}" class="relative mb-6 justify-between flex">
+                <div>
+                    <h2 class="text-lg font-semibold text-slate-800">Log Poin</h2>
+                    <p class="text-sm text-slate-500 mt-1">Riwayat perubahan poin berdasarkan aktivitas Anda.</p>
+                </div>
+
+                <button @click="info = true" type="button">
+                    <div class="text-yellow-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 640 640"><!--!Font Awesome Free v7.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+                            <path fill="currentColor" d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM288 224C288 206.3 302.3 192 320 192C337.7 192 352 206.3 352 224C352 241.7 337.7 256 320 256C302.3 256 288 241.7 288 224zM280 288L328 288C341.3 288 352 298.7 352 312L352 400L360 400C373.3 400 384 410.7 384 424C384 437.3 373.3 448 360 448L280 448C266.7 448 256 437.3 256 424C256 410.7 266.7 400 280 400L304 400L304 336L280 336C266.7 336 256 325.3 256 312C256 298.7 266.7 288 280 288z" />
+                        </svg>
+                    </div>
+                </button>
+                <div
+                    x-show="info" x-transition class="absolute right-0 mt-4 z-50 flex items-center justify-center p-4">
+
+                    <!-- CONTENT -->
+                    <div @click.away="info=false" class="bg-yellow-100 border-2 border-yellow-200 w-min-full max-w-lg rounded-xl shadow-2xl overflow-hidden p-4">
+                        <div class="text-[11px] leading-normal">
+                            <p class="font-semibold">Poin didapatkan saat anda:</p>
+                            <p>- Menyelesaikan tugas yang telah diambil <span class="text-green-600">(Bertambah)</span></p>
+                            <p>- Membatalkan tugas yang telah diambil <span class="text-red-600">(Berkurang)</span></p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="space-y-4 max-h-75 overflow-y-auto pr-2">
@@ -523,7 +591,7 @@
                 @empty
                 <x-list-empty title="Belum Ada Riwayat Log Poin" subtitle="Semua riwayat log poin akan tampil disini">
                     <x-slot:icon>
-                        <svg class="w-10 h-10 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+                        <svg class="w-10 h-10 text-gray-400" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
                             <path fill="currentColor" d="M104 112C90.7 112 80 122.7 80 136L80 184C80 197.3 90.7 208 104 208L152 208C165.3 208 176 197.3 176 184L176 136C176 122.7 165.3 112 152 112L104 112zM256 128C238.3 128 224 142.3 224 160C224 177.7 238.3 192 256 192L544 192C561.7 192 576 177.7 576 160C576 142.3 561.7 128 544 128L256 128zM256 288C238.3 288 224 302.3 224 320C224 337.7 238.3 352 256 352L544 352C561.7 352 576 337.7 576 320C576 302.3 561.7 288 544 288L256 288zM256 448C238.3 448 224 462.3 224 480C224 497.7 238.3 512 256 512L544 512C561.7 512 576 497.7 576 480C576 462.3 561.7 448 544 448L256 448zM80 296L80 344C80 357.3 90.7 368 104 368L152 368C165.3 368 176 357.3 176 344L176 296C176 282.7 165.3 272 152 272L104 272C90.7 272 80 282.7 80 296zM104 432C90.7 432 80 442.7 80 456L80 504C80 517.3 90.7 528 104 528L152 528C165.3 528 176 517.3 176 504L176 456C176 442.7 165.3 432 152 432L104 432z" />
                         </svg>
                     </x-slot:icon>

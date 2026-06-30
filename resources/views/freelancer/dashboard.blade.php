@@ -229,7 +229,7 @@ $keunggulanText = $delay == 0
 
                     //Belum pernah reset
 
-                    if (!this.resetLevel.last_reset_at) {
+                    if (!this.resetLevel?.last_reset_at) {
 
                         this.countdown = 'Belum ada reset';
 
@@ -246,6 +246,11 @@ $keunggulanText = $delay == 0
                         nextReset.getDate() +
                         parseInt(this.resetLevel.lama_hari)
                     );
+
+                    if (!this.resetLevel?.jam_reset) {
+                        this.countdown = 'Jam reset belum diatur';
+                        return;
+                    }
 
                     let jam = this.resetLevel.jam_reset.split(':');
 

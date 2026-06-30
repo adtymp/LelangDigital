@@ -86,7 +86,7 @@ return [
         ],
 
         [
-            'label' => 'Upload Tugas',
+            'label' => 'Tugas',
             'route' => 'freelancer.uploadTugas',
             'icon' => 'upload',
             'badge' => 'upload'

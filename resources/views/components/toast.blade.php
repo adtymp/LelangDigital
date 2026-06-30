@@ -1,7 +1,7 @@
 <div
     x-data="toastNotification()"
     x-on:notify.window="show($event.detail)"
-    class="fixed top-4 right-4 z-[9999] space-y-3 w-full max-w-sm">
+    class="fixed top-4 right-0 z-[9999] space-y-3 w-full max-w-sm">
 
     <template x-for="item in notifications" :key="item.id">
 

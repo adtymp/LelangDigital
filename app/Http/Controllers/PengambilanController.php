@@ -9,6 +9,7 @@ use App\Models\Pembayaran;
 use App\Models\Pengambilan;
 use App\Models\Subsubproyek;
 use App\Models\User;
+use App\Services\GoogleDriveService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -83,6 +84,11 @@ class PengambilanController extends Controller
     public function downloadPdfSubsubproyek($id)
     {
         $filePdf = Subsubproyek::findOrFail($id);
+
+        if ($filePdf->pdf_source === 'google_drive') {
+            $url = "https://drive.google.com/file/d/" . $filePdf->file_pdf . "/view?usp=sharing";
+            return redirect()->away($url);
+        }
 
         if (!$filePdf->file_pdf || !Storage::disk('public')->exists($filePdf->file_pdf)) {
             return back()->with('error', 'File PDF tidak ditemukan.');
@@ -240,10 +246,25 @@ class PengambilanController extends Controller
 
     private function splitPdf($pdfPath, $subsubId, $userId, $dari, $sampai)
     {
-        $source = storage_path('app/public/' . $pdfPath);
+        $subsub = \App\Models\Subsubproyek::find($subsubId);
+        $isGoogleDrive = ($subsub && $subsub->pdf_source === 'google_drive');
+
+        if ($isGoogleDrive) {
+            // File sudah diunduh saat input link Google Drive, ambil langsung dari folder drive_cache
+            $source = storage_path('app/temp/drive_cache/' . $pdfPath . '.pdf');
+
+            // Fallback: Jika file tidak sengaja terhapus, unduh ulang
+            if (!file_exists($source)) {
+                $driveService = new GoogleDriveService();
+                $driveService->downloadFile($pdfPath, $source);
+            }
+        } else {
+            // Skenario file lokal biasa
+            $source = storage_path('app/public/' . $pdfPath);
+        }
 
         if (!file_exists($source)) {
-            throw new \Exception("File PDF tidak ditemukan di: " . $source);
+            throw new \Exception("File PDF tidak ditemukan.");
         }
 
         $folder = 'pdf_split/subsub_' . $subsubId . '/user_' . $userId;
@@ -255,22 +276,14 @@ class PengambilanController extends Controller
         $fileName = 'split_' . $dari . '_' . $sampai . '_' . time() . '.pdf';
         $savePath = storage_path('app/public/' . $folder . '/' . $fileName);
 
-        // 1. Deteksi Sistem Operasi untuk menentukan Executable Ghostscript
-        // Windows menggunakan 'gswin64c' (console mode), Linux/macOS menggunakan 'gs'
+        // Potong PDF menggunakan Ghostscript
         $gsExecutable = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') ? 'gswin64c' : 'gs';
-
-        // 2. Susun perintah pemotongan halaman PDF secara aman menggunakan escapeshellarg
         $command = "{$gsExecutable} -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dNOPAUSE -dQUIET -dBATCH -sPageList={$dari}-{$sampai} -sOutputFile=" . escapeshellarg($savePath) . " " . escapeshellarg($source);
-
-        // 3. Eksekusi perintah di sistem operasi
-        $output = [];
-        $returnCode = 0;
 
         shell_exec($command);
 
-        // 4. Validasi apakah file hasil split berhasil dibuat
         if (!file_exists($savePath) || filesize($savePath) === 0) {
-            throw new \Exception("Gagal memotong PDF. Pastikan Ghostscript sudah terinstal dan terdaftar di Environment Path.");
+            throw new \Exception("Gagal memotong PDF. Pastikan Ghostscript terinstal.");
         }
 
         return $folder . '/' . $fileName;
@@ -279,17 +292,17 @@ class PengambilanController extends Controller
     public function downloadZip(Request $request)
     {
         $fileName = basename($request->query('file', '')); // basename() mencegah path traversal
-    
+
         if (empty($fileName)) {
             abort(404);
         }
-    
+
         $zipPath = storage_path('app/temp/' . $fileName);
-    
+
         if (!file_exists($zipPath)) {
             abort(404);
         }
-    
+
         return response()
             ->download($zipPath)
             ->deleteFileAfterSend(true);
@@ -297,6 +310,9 @@ class PengambilanController extends Controller
 
     public function ambilTugas(Request $request, $subsub)
     {
+        @set_time_limit(300);
+        @ini_set('max_execution_time', 300);
+
         $request->validate([
             'subsubproyek_id' => 'required|exists:subsubproyeks,id',
             'dari_halaman' => 'required|integer|min:1',
@@ -416,7 +432,6 @@ class PengambilanController extends Controller
                 }
 
                 $zip->close();
-
             } else {
                 throw new \Exception('Gagal membuat file ZIP');
             }

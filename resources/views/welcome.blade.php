@@ -398,10 +398,10 @@
         <!-- Feature 1 -->
         <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
           <div class="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center text-xl mb-6">
-            <i class="fas fa-scissors"></i>
+            <i class="fas fa-laptop-house"></i>
           </div>
-          <h4 class="text-xl font-bold text-gray-900 mb-3">Pemisahan Dokumen Otomatis</h4>
-          <p class="text-gray-600 text-sm leading-relaxed">Sistem memecah dokumen PDF proyek secara otomatis sesuai dengan halaman yang Anda klaim, menghindari tumpang tindih pengerjaan.</p>
+          <h4 class="text-xl font-bold text-gray-900 mb-3">Fleksibilitas & Kemudahan</h4>
+          <p class="text-gray-600 text-sm leading-relaxed">Akses portal dan kerjakan tugas yang Anda ambil dari mana saja dan kapan saja sesuai dengan kenyamanan serta jadwal Anda.</p>
         </div>
 
         <!-- Feature 2 -->

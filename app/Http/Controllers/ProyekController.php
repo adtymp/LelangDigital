@@ -11,6 +11,7 @@ use App\Models\ResetLevel;
 use App\Models\Subproyek;
 use App\Models\Subsubproyek;
 use App\Models\User;
+use App\Services\GoogleDriveService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -353,27 +354,66 @@ class ProyekController extends Controller
     public function getPdfInfo(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:pdf|max:512000'
+            'file' => 'nullable|file|mimes:pdf|max:512000',
+            'link_drive' => 'nullable|string'
         ]);
 
-        $path = $request->file('file')->store('temp_pdf', 'public');
-        $fullPath = storage_path('app/public/' . $path);
+        $totalHalaman = 0;
+        $tempPath = null;
+        $pdfSource = 'local';
+        $finalPathKey = null;
 
         try {
-            $config = new \Smalot\PdfParser\Config();
-            $config->setRetainImageContent(false);
-            $parser = new \Smalot\PdfParser\Parser([], $config);
-            $pdf = $parser->parseFile($fullPath);
-            $totalHalaman = count($pdf->getPages());
-        } catch (\Throwable $e) {
-            // Fallback: baca manual dari PDF binary dengan hemat memori
-            $totalHalaman = $this->hitungHalamanPdfManual($fullPath);
-        }
+            if ($request->hasFile('file')) {
+                // Skenario A: Upload File Lokal biasa
+                $path = $request->file('file')->store('temp_pdf', 'public');
+                $tempPath = storage_path('app/public/' . $path);
+                $finalPathKey = $path;
+                $pdfSource = 'local';
+            } elseif ($request->filled('link_drive')) {
+                // Skenario B: Tautan Google Drive
+                $driveService = new GoogleDriveService();
+                $fileId = $driveService->extractFileId($request->link_drive);
+                
+                // Simpan langsung di folder drive_cache secara permanen
+                $cacheFolder = storage_path('app/temp/drive_cache');
+                if (!file_exists($cacheFolder)) {
+                    mkdir($cacheFolder, 0755, true);
+                }
+                
+                $tempPath = $cacheFolder . '/' . $fileId . '.pdf';
+                
+                // Unduh file dari Google Drive ke server lokal hanya jika belum ada
+                if (!file_exists($tempPath)) {
+                    $driveService->downloadFile($fileId, $tempPath);
+                }
+                
+                $finalPathKey = $fileId; // Simpan File ID Google Drive ke database
+                $pdfSource = 'google_drive';
+            } else {
+                return response()->json(['message' => 'File atau Link Google Drive wajib diisi.'], 422);
+            }
 
-        return response()->json([
-            'total_halaman' => $totalHalaman,
-            'temp_pdf' => $path
-        ]);
+            // Hitung halaman PDF
+            try {
+                $config = new \Smalot\PdfParser\Config();
+                $config->setRetainImageContent(false);
+                $parser = new \Smalot\PdfParser\Parser([], $config);
+                $pdf = $parser->parseFile($tempPath);
+                $totalHalaman = count($pdf->getPages());
+            } catch (\Throwable $e) {
+                $totalHalaman = $this->hitungHalamanPdfManual($tempPath);
+            }
+
+            return response()->json([
+                'total_halaman' => $totalHalaman,
+                'temp_pdf' => $finalPathKey,
+                'pdf_source' => $pdfSource
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
     private function hitungHalamanPdfManual($path)
@@ -451,11 +491,15 @@ class ProyekController extends Controller
 
                 if (!empty($sub['sub_sub'])) {
                     foreach ($sub['sub_sub'] as $ss) {
+
                         $pdfPath = null;
+                        $pdfSource = 'local';
                         $totalHalamanPdf = 0;
 
                         if (!empty($ss['file_pdf'])) {
+
                             $pdfPath = $ss['file_pdf']->store('pdf_upload', 'public');
+                            $pdfSource = 'local';
                             $fullPath = storage_path('app/public/' . $pdfPath);
 
                             if (file_exists($fullPath)) {
@@ -470,23 +514,31 @@ class ProyekController extends Controller
                                 }
                             }
                         } elseif (!empty($ss['temp_pdf'])) {
-                            $tempFileName = basename($ss['temp_pdf']);
-                            $tempPath = storage_path('app/public/temp_pdf/' . $tempFileName);
 
-                            if (file_exists($tempPath)) {
-                                $pdfPath = 'pdf_upload/' . $tempFileName;
-                                $fullPath = storage_path('app/public/' . $pdfPath);
+                            if (($ss['pdf_source'] ?? 'local') === 'google_drive') {
+                                // Skenario Google Drive
+                                $pdfPath = $ss['temp_pdf']; // Ini berisi File ID
+                                $pdfSource = 'google_drive';
+                                $totalHalamanPdf = (int)$ss['total_halaman']; // Ambil halaman yang sudah didapat via AJAX sebelumnya
+                            } else {
+                                $tempPath = storage_path('app/public/' . $ss['temp_pdf']);
 
-                                // Pindahkan file secara instan
-                                rename($tempPath, $fullPath);
-                                try {
-                                    $config = new \Smalot\PdfParser\Config();
-                                    $config->setRetainImageContent(false);
-                                    $parser = new \Smalot\PdfParser\Parser([], $config);
-                                    $pdf = $parser->parseFile($fullPath);
-                                    $totalHalamanPdf = count($pdf->getPages());
-                                } catch (\Throwable $e) {
-                                    $totalHalamanPdf = $this->hitungHalamanPdfManual($fullPath);
+                                if (file_exists($tempPath)) {
+
+                                    $pdfPath = 'pdf_upload/' . basename($ss['temp_pdf']);
+                                    $pdfSource = 'local';
+                                    $fullPath = storage_path('app/public/' . $pdfPath);
+                                    rename($tempPath, $fullPath);
+
+                                    try {
+                                        $config = new \Smalot\PdfParser\Config();
+                                        $config->setRetainImageContent(false);
+                                        $parser = new \Smalot\PdfParser\Parser([], $config);
+                                        $pdf = $parser->parseFile($fullPath);
+                                        $totalHalamanPdf = count($pdf->getPages());
+                                    } catch (\Throwable $e) {
+                                        $totalHalamanPdf = $this->hitungHalamanPdfManual($fullPath);
+                                    }
                                 }
                             }
                         }
@@ -499,6 +551,7 @@ class ProyekController extends Controller
                         Subsubproyek::create([
                             'subproyek_id' => $subProyek->id,
                             'file_pdf' => $pdfPath,
+                            'pdf_source' => $pdfSource,
                             'file_xls' => $xlsPath,
                             'nama_halaman' => $ss['nama_halaman'],
                             'total_halaman' => $totalHalamanPdf,
@@ -587,10 +640,12 @@ class ProyekController extends Controller
                         }
 
                         $pdfPath = $subsub->file_pdf ?? null;
+                        $pdfSource = $subsub->pdf_source ?? 'local';
                         $totalHalamanPdf = $subsub->total_halaman ?? 0;
 
                         if (!empty($ss['file_pdf'])) {
                             $pdfPath = $ss['file_pdf']->store('pdf_upload', 'public');
+                            $pdfSource = 'local';
                             $fullPath = storage_path('app/public/' . $pdfPath);
 
                             if (file_exists($fullPath)) {
@@ -605,24 +660,31 @@ class ProyekController extends Controller
                                 }
                             }
                         } elseif (!empty($ss['temp_pdf'])) { // <-- TAMBAHKAN BLOK ELSEIF INI
-                            $tempFileName = basename($ss['temp_pdf']);
-                            $tempPath = storage_path('app/public/temp_pdf/' . $tempFileName);
 
-                            if (file_exists($tempPath)) {
-                                $pdfPath = 'pdf_upload/' . basename($ss['temp_pdf']);
-                                $fullPath = storage_path('app/public/' . $pdfPath);
+                            if (($ss['pdf_source'] ?? 'local') === 'google_drive') {
+                                // Google drive baru
+                                $pdfPath = $ss['temp_pdf']; // Drive ID
+                                $pdfSource = 'google_drive';
+                                $totalHalamanPdf = (int)$ss['total_halaman'];
+                            } else {
+                                $tempPath = storage_path('app/public/' . $ss['temp_pdf']);
 
-                                // Pindahkan file secara instan
-                                rename($tempPath, $fullPath);
+                                if (file_exists($tempPath)) {
+                                    
+                                    $pdfPath = 'pdf_upload/' . basename($ss['temp_pdf']);
+                                    $pdfSource = 'local';
+                                    $fullPath = storage_path('app/public/' . $pdfPath);
+                                    rename($tempPath, $fullPath);
 
-                                try {
-                                    $config = new \Smalot\PdfParser\Config();
-                                    $config->setRetainImageContent(false);
-                                    $parser = new \Smalot\PdfParser\Parser([], $config);
-                                    $pdf = $parser->parseFile($fullPath);
-                                    $totalHalamanPdf = count($pdf->getPages());
-                                } catch (\Throwable $e) {
-                                    $totalHalamanPdf = $this->hitungHalamanPdfManual($fullPath);
+                                    try {
+                                        $config = new \Smalot\PdfParser\Config();
+                                        $config->setRetainImageContent(false);
+                                        $parser = new \Smalot\PdfParser\Parser([], $config);
+                                        $pdf = $parser->parseFile($fullPath);
+                                        $totalHalamanPdf = count($pdf->getPages());
+                                    } catch (\Throwable $e) {
+                                        $totalHalamanPdf = $this->hitungHalamanPdfManual($fullPath);
+                                    }
                                 }
                             }
                         }
@@ -636,6 +698,7 @@ class ProyekController extends Controller
                         $data = [
                             'subproyek_id' => $subProyek->id,
                             'file_pdf' => $pdfPath,
+                            'pdf_source' => $pdfSource,
                             'file_xls' => $xlsPath,
                             'nama_halaman' => $ss['nama_halaman'],
                             'total_halaman' => $totalHalamanPdf,

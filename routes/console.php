@@ -26,3 +26,5 @@ Schedule::call(function () {
         }
     }
 })->daily();
+
+Schedule::command('cache:hapus-drive-cache')->daily();

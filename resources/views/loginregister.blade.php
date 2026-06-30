@@ -48,20 +48,11 @@
                     <div class="space-y-4 pt-4">
                         <div class="flex items-start space-x-3">
                             <div class="shrink-0 w-6 h-6 rounded-full bg-white/15 flex items-center justify-center text-xs">
-                                <i class="fas fa-hand-holding-usd text-brand-200"></i>
+                                <i class="fas fa-laptop-house text-brand-200"></i>
                             </div>
                             <div>
-                                <h4 class="text-sm font-semibold text-white">Upah Per Lembar Jelas</h4>
-                                <p class="text-xs text-brand-200/80">Klaim tugas dengan harga per lembar halaman yang pasti.</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start space-x-3">
-                            <div class="shrink-0 w-6 h-6 rounded-full bg-white/15 flex items-center justify-center text-xs">
-                                <i class="fas fa-scissors text-brand-200"></i>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-semibold text-white">Pemisahan PDF Otomatis</h4>
-                                <p class="text-xs text-brand-200/80">Sistem membagi tugas PDF secara otomatis sesuai klaim Anda.</p>
+                                <h4 class="text-sm font-semibold text-white">Fleksibilitas & Kemudahan</h4>
+                                <p class="text-xs text-brand-200/80">Akses portal dan kerjakan tugas dari mana saja dan kapan saja sesuai dengan kenyamanan serta jadwal Anda.</p>
                             </div>
                         </div>
                         <div class="flex items-start space-x-3">
@@ -71,6 +62,15 @@
                             <div>
                                 <h4 class="text-sm font-semibold text-white">Sistem Poin & Leveling</h4>
                                 <p class="text-xs text-brand-200/80">Dapatkan poin dari kualitas kerja untuk menaikkan reputasi level.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="shrink-0 w-6 h-6 rounded-full bg-white/15 flex items-center justify-center text-xs">
+                                <i class="fas fa-shield-alt text-brand-200"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-white">Verifikasi & Transparansi</h4>
+                                <p class="text-xs text-brand-200/80">Validasi ketat dan transparansi penilaian menjamin keadilan penilaian kualitas dan kepastian upah pekerjaan.</p>
                             </div>
                         </div>
                     </div>
@@ -266,6 +266,15 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="mb-4 p-3 bg-yellow-100 border border-yellow-200 rounded-xl flex items-start gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-yellow-600 shrink-0 mt-0.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 1 1 1.063 1.06l-.041.02a.75.75 0 0 1-1.063-1.06Zm0 4.5.041-.02a.75.75 0 1 1 1.063 1.06l-.041.02a.75.75 0 0 1-1.063-1.06ZM12 22.5c5.799 0 10.5-4.701 10.5-10.5S17.799 1.5 12 1.5 1.5 6.201 1.5 12 6.201 22.5 12 22.5Z" />
+                        </svg>
+                        <p class="text-[11px] text-brand-800 leading-normal">
+                            Setelah anda melakukan pendaftaran, akun akan diajukan kepada admin untuk disetujui. Anda akan mendapatkan notifikasi dari email untuk informasi pengajuan pendaftaran akun ini. Pastikan email anda adalah email asli untuk mendapatkan informasi lebih lanjut.
+                        </p>
                     </div>
 
                     <div class="pt-3">

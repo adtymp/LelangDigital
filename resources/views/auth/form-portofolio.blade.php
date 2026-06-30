@@ -230,6 +230,15 @@
 
                         </div>
 
+                        <div class="mb-4 p-3 bg-yellow-100 border border-yellow-200 rounded-xl flex items-start gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-yellow-600 shrink-0 mt-0.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 1 1 1.063 1.06l-.041.02a.75.75 0 0 1-1.063-1.06Zm0 4.5.041-.02a.75.75 0 1 1 1.063 1.06l-.041.02a.75.75 0 0 1-1.063-1.06ZM12 22.5c5.799 0 10.5-4.701 10.5-10.5S17.799 1.5 12 1.5 1.5 6.201 1.5 12 6.201 22.5 12 22.5Z" />
+                            </svg>
+                            <p class="text-[11px] text-brand-800 leading-normal">
+                                Setelah anda melakukan pendaftaran, akun akan diajukan kepada admin untuk disetujui. Anda akan mendapatkan notifikasi dari email untuk informasi pengajuan pendaftaran akun ini. Pastikan email anda adalah email asli untuk mendapatkan informasi lebih lanjut.
+                            </p>
+                        </div>
+
                         <x-primary-button type="submit" full>Kirim Pendaftaran</x-primary-button>
 
                     </form>

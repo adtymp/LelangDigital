@@ -135,33 +135,54 @@
                                     </div>
 
                                     <!-- FILE PDF AREA -->
-                                    <div class="border border-slate-100 bg-slate-50/50 rounded-lg p-3">
-                                        <label class="block text-xs font-semibold text-slate-500 mb-1.5">File Tugas PDF</label>
+                                    <div class="border border-slate-100 bg-slate-50/50 rounded-lg p-3" x-data="{ inputType: 'file' }">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <label class="block text-xs font-semibold text-slate-500">File Tugas PDF</label>
+
+                                            <!-- Pilihan Sumber PDF (Lokal vs Google Drive) -->
+                                            <div class="flex gap-2 text-[10px]">
+                                                <button type="button" @click="inputType = 'file'; ss.temp_pdf = null; ss.pdf_source = 'local';"
+                                                    :class="inputType === 'file' ? 'bg-brand-500 text-white font-bold' : 'bg-slate-200 text-slate-600'"
+                                                    class="px-2 py-0.5 rounded transition">File Lokal</button>
+                                                <button type="button" @click="inputType = 'drive'; ss.temp_pdf = null; ss.pdf_source = 'google_drive';"
+                                                    :class="inputType === 'drive' ? 'bg-brand-500 text-white font-bold' : 'bg-slate-200 text-slate-600'"
+                                                    class="px-2 py-0.5 rounded transition">Google Drive</button>
+                                            </div>
+                                        </div>
 
                                         <!-- PDF Existing (Edit Mode) -->
                                         <template x-if="ss.file_pdf_existing">
                                             <div class="flex items-center gap-2 text-xs bg-brand-50 border border-brand-100 text-brand-800 rounded-md p-2 mb-2">
                                                 <span>📄</span>
-                                                <a :href="`/storage/${ss.file_pdf_existing}`" target="_blank" class="underline font-semibold flex-1 truncate" x-text="ss.file_pdf_existing.split('/').pop()"></a>
+                                                <span class="flex-1 truncate" x-text="ss.pdf_source === 'google_drive' ? 'Link Google Drive Tersimpan' : ss.file_pdf_existing.split('/').pop()"></span>
                                                 <span class="text-[10px] text-brand-500">(Tersimpan)</span>
                                             </div>
                                         </template>
 
-                                        <input type="file"
-                                            :id="`file_pdf_${subIdx}_${ssIdx}`"
-                                            :name="ss.temp_pdf ? '' : `sub_proyek[${subIdx}][sub_sub][${ssIdx}][file_pdf]`"
-                                            accept="application/pdf"
-                                            @change="handlePdf($event, subIdx, ssIdx)"
-                                            class="w-full text-xs text-slate-500 file:mr-3 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 cursor-pointer">
+                                        <!-- OPSI A: INPUT FILE LOKAL -->
+                                        <div x-show="inputType === 'file'">
+                                            <input type="file"
+                                                :id="`file_pdf_${subIdx}_${ssIdx}`"
+                                                :name="ss.temp_pdf ? '' : `sub_proyek[${subIdx}][sub_sub][${ssIdx}][file_pdf]`"
+                                                accept="application/pdf"
+                                                @change="handlePdf($event, subIdx, ssIdx)"
+                                                class="w-full text-xs text-slate-500 file:mr-3 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 cursor-pointer">
+                                        </div>
 
-                                        <input type="hidden"
-                                            :name="`sub_proyek[${subIdx}][sub_sub][${ssIdx}][temp_pdf]`"
-                                            x-model="ss.temp_pdf">
+                                        <!-- OPSI B: INPUT LINK GOOGLE DRIVE -->
+                                        <div x-show="inputType === 'drive'" class="flex gap-2">
+                                            <input type="text"
+                                                placeholder="Tempel tautan Google Drive disini"
+                                                class="w-full px-2 py-1 text-xs border border-slate-200 rounded-md focus:outline-none"
+                                                @keydown.enter.prevent="handleDriveLink($event, subIdx, ssIdx)"
+                                                @blur="handleDriveLink($event, subIdx, ssIdx)">
+                                        </div>
 
-                                        <!-- REAL-TIME PAGE COUNT -->
-                                        <!-- UPLOAD PROGRESS + PAGE COUNT -->
+                                        <input type="hidden" :name="`sub_proyek[${subIdx}][sub_sub][${ssIdx}][temp_pdf]`" x-model="ss.temp_pdf">
+                                        <input type="hidden" :name="`sub_proyek[${subIdx}][sub_sub][${ssIdx}][pdf_source]`" x-model="ss.pdf_source">
+
+                                        <!-- PROGRESS BAR + HASIL HALAMAN -->
                                         <div class="mt-2 space-y-1.5">
-                                            <!-- PROGRESS BAR (muncul saat upload) -->
                                             <template x-if="ss.isUploading">
                                                 <div>
                                                     <div class="flex items-center justify-between text-xs mb-1">
@@ -189,21 +210,16 @@
                                                 </div>
                                             </template>
 
-                                            <!-- ERROR MESSAGE -->
+                                            <!-- ERROR -->
                                             <template x-if="ss.uploadError">
-                                                <div class="flex items-center gap-1.5 text-xs text-red-600 bg-red-50 border border-red-100 rounded-md p-2">
-                                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                    </svg>
-                                                    <span x-text="ss.uploadError"></span>
-                                                </div>
+                                                <div class="text-xs text-red-600 bg-red-50 p-2 rounded border border-red-100" x-text="ss.uploadError"></div>
                                             </template>
 
-                                            <!-- JUMLAH HALAMAN (muncul saat tidak upload) -->
+                                            <!-- TOTAL PAGES -->
                                             <template x-if="!ss.isUploading">
-                                                <div class="flex items-center gap-2 text-xs">
-                                                    <span class="text-slate-500">Jumlah Halaman:</span>
-                                                    <span class="font-bold text-slate-700" x-text="ss.total_halaman > 0 ? ss.total_halaman + ' Halaman' : '- Halaman (Upload PDF)'"></span>
+                                                <div class="text-xs flex gap-2">
+                                                    <span class="text-slate-500">Halaman:</span>
+                                                    <span class="font-bold text-slate-700" x-text="ss.total_halaman > 0 ? ss.total_halaman + ' Halaman' : 'Kosong'"></span>
                                                 </div>
                                             </template>
                                         </div>
@@ -224,7 +240,7 @@
 
                                         <input type="file"
                                             :name="`sub_proyek[${subIdx}][sub_sub][${ssIdx}][file_xls]`"
-                                            accept=".xls,.xlsx"
+                                            accept=".xls,.xlsx,.csv"
                                             class="w-full text-xs text-slate-500 file:mr-3 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
                                     </div>
 
@@ -430,6 +446,7 @@
                     uploadProgress: 0,
                     uploadError: null,
                     temp_pdf: null,
+                    pdf_source: 'local',
                     xhr: null
                 });
             },
@@ -546,6 +563,67 @@
 
                     xhr.send(formData);
                 });
+            },
+
+            async handleDriveLink(event, subIndex, ssIndex) {
+                let link = event.target.value.trim();
+                if (!link) return;
+
+                let ss = this.sub_proyek[subIndex].sub_sub[ssIndex];
+                ss.uploadError = null;
+                ss.isUploading = true;
+                ss.uploadProgress = 0; // Nilai dummy awal
+
+                // Simulasikan pergerakan progress bar internal karena server-to-server download
+                let progressInterval = setInterval(() => {
+                    if (ss.uploadProgress < 90) {
+                        ss.uploadProgress += 10;
+                    }
+                }, 400);
+
+                let formData = new FormData();
+                formData.append('link_drive', link);
+                formData.append('_token', '{{ csrf_token() }}');
+
+                let xhr = new XMLHttpRequest();
+                ss.xhr = xhr;
+                xhr.open('POST', '{{ route("ajax.pdf.info") }}', true);
+                xhr.setRequestHeader('Accept', 'application/json');
+                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+                xhr.onload = () => {
+                    clearInterval(progressInterval);
+                    ss.isUploading = false;
+                    ss.xhr = null;
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            let data = JSON.parse(xhr.responseText);
+                            ss.total_halaman = data.total_halaman || 0;
+                            ss.temp_pdf = data.temp_pdf || null; // Ini berisi Google Drive File ID
+                            ss.pdf_source = 'google_drive';
+                            ss.uploadError = null;
+                            this.hitungSubtotal(subIndex, ssIndex);
+                        } catch (err) {
+                            ss.uploadError = 'Gagal membaca respons server.';
+                        }
+                    } else {
+                        try {
+                            let errData = JSON.parse(xhr.responseText);
+                            ss.uploadError = errData.message || 'Tautan Google Drive tidak valid.';
+                        } catch {
+                            ss.uploadError = 'Gagal memproses tautan Google Drive.';
+                        }
+                    }
+                };
+
+                xhr.onerror = () => {
+                    clearInterval(progressInterval);
+                    ss.isUploading = false;
+                    ss.xhr = null;
+                    ss.uploadError = 'Koneksi terputus saat menghubungi server.';
+                };
+
+                xhr.send(formData);
             },
 
             cancelUpload(subIndex, ssIndex) {

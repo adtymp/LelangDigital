@@ -94,6 +94,12 @@ class LoginController extends Controller
     {
         $request->validated();
 
+        // dd(
+        //     $request->all(),
+        //     $request->hasFile('file_path'),
+        //     $request->file('file_path')
+        // );
+
         DB::beginTransaction();
 
         try {

@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\File;
 
 class TambahProyek extends FormRequest
 {
@@ -20,6 +21,7 @@ class TambahProyek extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
+    
     public function rules()
     {
         return [
@@ -38,7 +40,9 @@ class TambahProyek extends FormRequest
             'sub_proyek.*.sub_sub.*.kualitas' => 'required|string|max:100',
 
             'sub_proyek.*.sub_sub.*.file_pdf' => 'nullable|file|mimes:pdf|max:512000',
-            'sub_proyek.*.sub_sub.*.file_xls' => 'required|nullable|file|mimes:xls,xlsx|max:10240',
+            'sub_proyek.*.sub_sub.*.temp_pdf' => 'nullable|string',
+            'sub_proyek.*.sub_sub.*.pdf_source' => 'nullable|string|in:local,google_drive',
+            'sub_proyek.*.sub_sub.*.file_xls' => 'required',File::types(['xls', 'xlsx', 'csv'])->max(10240),
         ];
     }
 
@@ -50,7 +54,7 @@ class TambahProyek extends FormRequest
             'tanggal_mulai.required' => 'Tanggal mulai wajib diisi',
             'tanggal_selesai.required' => 'Tanggal selesai wajib diisi',
             'tanggal_selesai.after_or_equal' => 'Tanggal selesai tidak boleh sebelum tanggal mulai',
-            
+
             'sub_proyek.required' => 'Minimal 1 sub proyek',
 
             'sub_proyek.*.nama.required' => 'Nama sub proyek wajib diisi',
@@ -61,7 +65,7 @@ class TambahProyek extends FormRequest
 
             'sub_proyek.*.sub_sub.*.file_xls.required' => 'File XLS/XLSX masih kosong',
             'sub_proyek.*.sub_sub.*.file_pdf.mimes' => 'File harus PDF',
-            'sub_proyek.*.sub_sub.*.file_xls.mimes' => 'File harus XLS/XLSX',
+            'sub_proyek.*.sub_sub.*.file_xls.mimes' => 'File harus XLS/XLSX/CSV',
         ];
     }
 }

@@ -30,22 +30,22 @@
     }"
 
     x-init="
-        @if(session('success'))
-            show('success', '{{ session('success') }}')
-        @endif
+    @if(session('success'))
+        show('success', {{ json_encode(session('success')) }})
+    @endif
 
-        @if(session('error'))
-            show('error', '{{ session('error') }}')
-        @endif
+    @if(session('error'))
+        show('error', {{ json_encode(session('error')) }})
+    @endif
 
-        @if($errors->any())
-        show('error', '{{ $errors->first() }}')
-        @endif
-    "
+    @if($errors->any())
+        show('error', {{ json_encode($errors->first()) }})
+    @endif
+"
 
     @toast.window="show($event.detail.type, $event.detail.message)"
 
-    class="fixed top-4 right-4 z-[9999] space-y-3 w-full max-w-sm">
+    class="fixed top-4 right-0 z-[9999] space-y-3 w-full max-w-sm">
 
     <template x-for="item in notifications" :key="item.id">
 

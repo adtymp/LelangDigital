@@ -58,7 +58,9 @@
                         <p class="text-sm font-semibold text-slate-900 truncate">File PDF Tugas</p>
                         <p class="text-xs text-slate-500">Unduh petunjuk kerja</p>
                     </div>
-                    <a href="{{ route('freelancer.downloadPdfSubsubproyek', $subsub->id) }}" class="flex items-center justify-center w-9 h-9 bg-brand-50 text-brand-700 hover:bg-brand-600 hover:text-white rounded-xl transition-all shadow-sm shrink-0">
+                    <a href="{{ route('freelancer.downloadPdfSubsubproyek', $subsub->id) }}" 
+                       target="_blank" 
+                       class="flex items-center justify-center w-9 h-9 bg-brand-50 text-brand-700 hover:bg-brand-600 hover:text-white rounded-xl transition-all shadow-sm shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
                         </svg>
@@ -223,6 +225,25 @@
                 </form>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- LOADING OVERLAY -->
+<div id="loadingOverlay" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-all duration-300 opacity-0 pointer-events-none">
+    <div class="bg-white p-6 rounded-3xl shadow-2xl flex flex-col items-center max-w-xl text-center mx-4 border border-slate-100">
+        <!-- Spinner -->
+        <svg class="animate-spin h-10 w-10 text-brand-600 mb-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <h4 class="text-sm font-bold text-slate-800 mb-1">Sedang Memproses Tugas</h4>
+        <p class="text-xs text-slate-600 leading-normal">
+            Kami sedang memotong halaman PDF & menyiapkan file template ZIP Anda. Harap tidak menutup atau memuat ulang halaman ini...
+        </p>
+        <br>
+        <p class="text-xs text-slate-500 leading-normal">
+            Jika file Zip gagal diunduh. Anda dapat unduh manual pada halaman Tugas, sesuai dengan tugas yang anda ambil.
+        </p>
     </div>
 </div>
 
@@ -465,6 +486,12 @@
             e.preventDefault();
             showErrorAlert(`Rentang halaman ${from} - ${to} menabrak halaman yang sudah diambil. Silakan pilih rentang halaman lain.`);
             return;
+        }
+
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) {
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            overlay.classList.add('opacity-100');
         }
 
         // Lakukan refresh halaman setelah delay 2 detik (saat file ZIP mulai diunduh browser)

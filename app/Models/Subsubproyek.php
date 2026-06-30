@@ -13,6 +13,7 @@ class Subsubproyek extends Model
         'subproyek_id',
         'nama_halaman',
         'file_pdf',
+        'pdf_source',
         'file_xls',
         'total_halaman',
         'harga_perlembar',

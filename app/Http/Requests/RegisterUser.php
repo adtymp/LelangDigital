@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Rules\TerimaDomainPortofolio;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class RegisterUser extends FormRequest
@@ -34,13 +35,13 @@ class RegisterUser extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'min:3', 'max:255'],
+            'name' => ['required', 'string', 'min:3', 'max:255', 'regex:/^[\pL\s\'.-]+$/u'],
 
-            'email' => ['required', 'string', 'email:rfc,dns', 'max:255'],
+            'email' => ['required', 'string', 'email:rfc,dns', 'max:255', Rule::unique('users', 'email'),],
 
             'password' => ['required', 'confirmed', Password::min(8)->letters()->mixedCase()],
 
-            'no_telp' => ['required', 'string', 'min:10', 'max:20', 'regex:/^(08|\+628)[0-9]{8,15}$/'],
+            'no_telp' => ['required', 'string', 'min:10', 'max:20', 'regex:/^(08|\+628)[0-9]{8,15}$/', Rule::unique('users', 'no_telp')],
 
             'type' => ['required', 'string', 'in:link,file'],
 
@@ -56,10 +57,12 @@ class RegisterUser extends FormRequest
             'name.required' => 'Nama wajib diisi.',
             'name.min' => 'Nama minimal 3 karakter.',
             'name.max' => 'Nama maksimal 255 karakter.',
+            'name.regex' => 'Nama hanya boleh berisi huruf, spasi, titik, petik, dan tanda hubung.',
 
             'email.required' => 'Email wajib diisi.',
             'email.email' => 'Format email tidak valid.',
             'email.max' => 'Email terlalu panjang.',
+            'email.unique' => 'Email sudah terdaftar.',
 
             'password.required' => 'Password wajib diisi.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
@@ -68,6 +71,7 @@ class RegisterUser extends FormRequest
             'no_telp.min' => 'Nomor telepon terlalu pendek.',
             'no_telp.max' => 'Nomor telepon terlalu panjang.',
             'no_telp.regex' => 'Format nomor telepon harus dimulai dengan 08 atau +628.',
+            'no_telp.unique' => 'Nomor telepon sudah terdaftar.',
 
             'type.required' => 'Jenis portofolio wajib dipilih.',
             'type.in' => 'Jenis portofolio tidak valid.',
@@ -75,7 +79,7 @@ class RegisterUser extends FormRequest
             'file_path.required_if' => 'File portofolio wajib diunggah jika memilih tipe file.',
             'file_path.file' => 'Upload portofolio harus berupa file yang valid.',
             'file_path.mimes' => 'File portofolio harus berupa JPG, JPEG, PNG, atau PDF.',
-            'file_path.max' => 'Ukuran file portofolio maksimal 2 MB.',
+            'file_path.max' => 'Ukuran file portofolio maksimal 5 MB.',
 
             'link_url.required_if' => 'Link portofolio wajib diisi jika memilih tipe link.',
             'link_url.url' => 'Format link portofolio tidak valid.',

@@ -129,9 +129,9 @@ class PenilaianController extends Controller
         foreach ($slugAktif as $slug) {
             $nilai = (int) $skorInput[$slug];
 
-            if ($nilai < 8 && empty($catatanInput[$slug])) {
+            if ($nilai < 10 && empty($catatanInput[$slug])) {
                 return redirect()->back()->withErrors([
-                    'error' => "Catatan wajib diisi untuk aspek '{$slug}' karena skornya di bawah 8."
+                    'error' => "Catatan wajib diisi untuk aspek '{$slug}' karena skornya di bawah 10."
                 ]);
             }
         }
