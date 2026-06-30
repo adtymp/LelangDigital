@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
 use Illuminate\Database\Eloquent\Model;
 
 class LogPoin extends Model
 {
+    use HasUuids;
     protected $fillable = [
         'pengambilan_id',
         'jenis',

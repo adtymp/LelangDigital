@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pengambilans', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('subsubproyek_id')->constrained('subsubproyeks')->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignUuid('subsubproyek_id')->constrained('subsubproyeks')->onDelete('cascade');
             $table->integer('dari_halaman');
             $table->integer('sampai_halaman');
             $table->integer('total_halaman');

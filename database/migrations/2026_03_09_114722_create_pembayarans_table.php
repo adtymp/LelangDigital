@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pembayarans', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('penilaian_id')->constrained('penilaians')->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->foreignUuid('penilaian_id')->constrained('penilaians')->onDelete('cascade');
             $table->enum('status', ['sudah_dibayar', 'belum_dibayar']);
             $table->string('bukti_transfer')->nullable();
             $table->decimal('total_pembayaran');

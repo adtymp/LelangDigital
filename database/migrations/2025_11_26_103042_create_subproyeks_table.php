@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('subproyeks', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('proyek_id')->constrained('proyeks')->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->foreignUuid('proyek_id')->constrained('proyeks')->onDelete('cascade');
             $table->string('nama_sub_proyek');
             $table->integer('total_halaman')->default(0);
             $table->boolean('is_delete')->default(false);

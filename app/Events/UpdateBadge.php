@@ -21,7 +21,7 @@ class UpdateBadge implements ShouldBroadcast
 
     public $userId;
     public $role;
-    public function __construct(int $userId, string $role)
+    public function __construct(string $userId, string $role)
     {
         $this->userId = $userId;
         $this->role   = $role;

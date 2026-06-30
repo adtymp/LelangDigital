@@ -314,7 +314,7 @@ class PembayaranController extends Controller
     public function uploadPembayaran(Request $request)
     {
         $request->validate([
-            'id' => 'required|integer|exists:pembayarans,id',
+            'id' => 'required|uuid|exists:pembayarans,id',
             'bukti_transfer' => 'required|file|mimes:jpg,png,pdf|max:2048'
         ]);
 

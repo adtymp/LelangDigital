@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('reset_levels', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->enum('status', ['aktif', 'nonaktif'])->default('nonaktif');
             $table->integer('lama_hari')->default(30);
             $table->time('jam_reset')->default('00:00:00');

@@ -156,8 +156,8 @@
 @if($selectedUser)
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const authId = {{ auth()->id() }};
-        const otherId = {{ $selectedUser->id }};
+        const authId = '{{ auth()->id() }}';
+        const otherId = '{{ $selectedUser->id }}';
         const csrfToken = '{{ csrf_token() }}';
         const sendUrl = '{{ route('chat.send') }}';
         const readUrl = '{{ route('chat.read', $selectedUser->id) }}';
@@ -226,7 +226,7 @@
         });
 
         if (window.Echo) {
-            const ids = [authId, otherId].sort((a, b) => a - b);
+            const ids = [authId, otherId].sort();
             window.Echo.private(`chat.${ids[0]}.${ids[1]}`)
                 .listen('.pesan.kirim', (e) => {
                     if (e.pengirim_id !== authId) {

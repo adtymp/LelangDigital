@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pesans', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('pengirim_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('penerima_id')->constrained('users')->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->foreignUuid('pengirim_id')->constrained('users')->onDelete('cascade');
+            $table->foreignUuid('penerima_id')->constrained('users')->onDelete('cascade');
             $table->text('teks');
             $table->timestamp('read_at')->nullable();
             $table->timestamps();

@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('subsubproyeks', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('subproyek_id')->constrained('subproyeks')->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->foreignUuid('subproyek_id')->constrained('subproyeks')->onDelete('cascade');
             $table->string('nama_halaman');
             $table->string('file_pdf');
             $table->string('file_xls');

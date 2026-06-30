@@ -10,7 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
-use Spatie\Permission\Models\Role;
+use App\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -70,6 +70,21 @@ class DatabaseSeeder extends Seeder
                 'delay_notifikasi' => $itemLevel['delay_notifikasi'],
             ]);
         }
+
+        $level = Level::orderByDesc('nama_level')->first();
+
+        $freelancer = User::factory()->create([
+            'name' => 'Ikhsan',
+            'email' => 'ikhsan@gmail.com',
+            'password' => bcrypt('sayaIkhsan'),
+            'status_akun' => 'aktif',
+            'level_id' => $level?->id,
+            'status_verifikasi' => 'diterima',
+            'no_telp' => '081111111111',
+            'poin_level' => 7128
+        ]);
+
+        $freelancer->assignRole('freelancer');
 
         $data = [
             [

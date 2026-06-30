@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('log_poins', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('pengambilan_id')->constrained('pengambilans')->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->foreignUuid('pengambilan_id')->constrained('pengambilans')->onDelete('cascade');
             $table->enum('jenis', ['tambah', 'kurang']);
             $table->integer('jumlah_poin');
             $table->timestamps();

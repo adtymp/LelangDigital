@@ -71,7 +71,7 @@
             @forelse ($jumlahPerProyek as $item)
 
             <button
-                @click="loadDetail({{ $item->id }})"
+                @click="loadDetail(@js($item->id))"
                 class="group bg-white border border-gray-200 rounded-3xl p-6 text-left hover:-translate-y-1 hover:shadow-xl transition duration-300">
 
                 <div class="flex items-start justify-between gap-4">

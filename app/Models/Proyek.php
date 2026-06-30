@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Proyek extends Model
 {
+    use HasUuids;
     protected $fillable = [
         'nama_proyek',
         'tanggal_mulai',
