@@ -7,7 +7,11 @@
     <title>Login & Register</title>
     <link rel="icon" type="image/png" href="{{ asset('image/logo-pranala.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'" />
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    </noscript>
     <style>
         [x-cloak] {
             display: none !important;
@@ -29,7 +33,7 @@
                 <div class="absolute -bottom-20 -right-20 w-60 h-60 bg-brand-500/30 rounded-full blur-3xl"></div>
                 <div class="flex items-center space-x-3 z-10">
                     <div class="p-2.5 bg-white backdrop-blur-md rounded-2xl border border-white/20">
-                        <img src="{{ asset('image/logo-pranala.png') }}" alt="Logo" class="w-8 h-8 object-contain">
+                        <img src="{{ asset('image/logo-pranala.png') }}" alt="Logo" width="32" height="32" fetchpriority="high" class="w-8 h-8 object-contain">
                     </div>
                     <div>
                         <h2 class="font-bold text-lg leading-tight tracking-wide">Pranala GigPortal</h2>
@@ -86,7 +90,7 @@
 
                 <!-- Mobile Header (Hanya tampil di mobile) -->
                 <div class="flex flex-col items-center text-center mb-6 space-y-2 md:hidden">
-                    <img src="{{ asset('image/logo-pranala.png') }}" alt="Logo" class="w-12 h-12 object-contain">
+                    <img src="{{ asset('image/logo-pranala.png') }}" alt="Logo" width="48" height="48" fetchpriority="high" class="w-12 h-12 object-contain">
                     <div>
                         <h2 class="text-2xl font-bold bg-linear-to-r from-brand-500 to-brand-700 bg-clip-text text-transparent">Pranala GigPortal</h2>
                         <p class="text-xs text-gray-500 font-medium">PT. Digital Pranala Transmaritim</p>
@@ -286,7 +290,7 @@
                 <div class="mt-4">
                     <a href="{{ route('google.login') }}"
                         class="w-full inline-flex items-center justify-center gap-3 border border-slate-300 rounded-xl px-4 py-3 hover:bg-slate-50 active:bg-slate-100 transition-colors shadow-sm">
-                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google Logo">
+                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" height="20" loading="lazy" class="w-5 h-5" alt="Google Logo">
                         <span class="font-semibold text-sm text-slate-700">
                             Lanjut dengan Google
                         </span>

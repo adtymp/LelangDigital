@@ -20,7 +20,12 @@
 
         <a href="/" class="flex items-center gap-2.5">
             <div class="w-9 h-9 rounded-xl bg-brand-50 border border-brand-100 flex items-center justify-center shadow-xs shrink-0">
-                <img src="{{ asset('image/logo-pranala.png') }}" alt="Logo" class="w-5 h-5 object-contain">
+                <img src="{{ asset('image/logo-pranala.png') }}"
+                    alt="Logo Pranala"
+                    width="40"
+                    height="40"
+                    fetchpriority="high"
+                    class="w-6 h-6 object-contain">
             </div>
             <span class="text-sm sm:text-base font-bold text-brand-600 truncate max-w-32 sm:max-w-none">Pranala GigPortal</span>
         </a>
